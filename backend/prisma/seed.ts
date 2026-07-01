@@ -11,10 +11,10 @@ async function main() {
 
   // 1. Create Admin
   const admin = await prisma.user.upsert({
-    where: { email: 'admin@tahfez.com' },
+    where: { username: 'admin' },
     update: {},
     create: {
-      email: 'admin@tahfez.com',
+      username: 'admin',
       passwordHash,
       name: 'عبد الله العتيبي (المدير)',
       phone: '0500000001',
@@ -22,14 +22,14 @@ async function main() {
       avatarUrl: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150'
     }
   });
-  console.log(`- Admin created: ${admin.email}`);
+  console.log(`- Admin created: ${admin.username}`);
 
   // 2. Create Teacher
   const teacherUser = await prisma.user.upsert({
-    where: { email: 'teacher@tahfez.com' },
+    where: { username: 'teacher' },
     update: {},
     create: {
-      email: 'teacher@tahfez.com',
+      username: 'teacher',
       passwordHash,
       name: 'الشيخ عبد الرحمن محمد',
       phone: '0500000002',
@@ -46,14 +46,14 @@ async function main() {
       bio: 'إجازة في القراءات العشر، خبرة 10 سنوات في تعليم التجويد والتحفيظ.'
     }
   });
-  console.log(`- Teacher profile created for: ${teacherUser.email}`);
+  console.log(`- Teacher profile created for: ${teacherUser.username}`);
 
   // 3. Create Parent
   const parentUser = await prisma.user.upsert({
-    where: { email: 'parent@tahfez.com' },
+    where: { username: 'parent' },
     update: {},
     create: {
-      email: 'parent@tahfez.com',
+      username: 'parent',
       passwordHash,
       name: 'أحمد الحارثي (ولي أمر)',
       phone: '0500000003',
@@ -67,14 +67,14 @@ async function main() {
     update: {},
     create: { userId: parentUser.id }
   });
-  console.log(`- Parent profile created for: ${parentUser.email}`);
+  console.log(`- Parent profile created for: ${parentUser.username}`);
 
   // 4. Create Student
   const studentUser = await prisma.user.upsert({
-    where: { email: 'student@tahfez.com' },
+    where: { username: 'student' },
     update: {},
     create: {
-      email: 'student@tahfez.com',
+      username: 'student',
       passwordHash,
       name: 'يوسف أحمد الحارثي',
       phone: '0500000004',
@@ -91,7 +91,7 @@ async function main() {
       parentId: parentProfile.id
     }
   });
-  console.log(`- Student profile created and linked to parent: ${studentUser.email}`);
+  console.log(`- Student profile created and linked to parent: ${studentUser.username}`);
 
   // 5. Create Halaqa (Group)
   const groupHalaqa = await prisma.halaqa.create({
@@ -264,10 +264,10 @@ async function main() {
   });
 
   console.log('🌱 Seed complete! Demo login credentials:');
-  console.log('  1. مدير: admin@tahfez.com / password123');
-  console.log('  2. معلم: teacher@tahfez.com / password123');
-  console.log('  3. ولي أمر: parent@tahfez.com / password123');
-  console.log('  4. طالب: student@tahfez.com / password123');
+  console.log('  1. مدير: admin / password123');
+  console.log('  2. معلم: teacher / password123');
+  console.log('  3. ولي أمر: parent / password123');
+  console.log('  4. طالب: student / password123');
 }
 
 main()
