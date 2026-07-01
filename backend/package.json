@@ -4,7 +4,7 @@
   "description": "REST API for Tahfez Quran Memorization Platform",
   "main": "dist/server.js",
   "scripts": {
-    "build": "tsc",
+    "build": "prisma generate && tsc",
     "start": "node dist/server.js",
     "dev": "nodemon src/server.ts",
     "prisma:generate": "prisma generate",
