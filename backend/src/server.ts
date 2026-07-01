@@ -58,10 +58,14 @@ app.use((err: any, _req: express.Request, res: express.Response, _next: express.
 });
 
 // Start Server
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`=============================================`);
-  console.log(`🕋 Tahfez Platform Server is running!`);
-  console.log(`🌐 API Base URL: http://0.0.0.0:${PORT}`);
-  console.log(`📚 Swagger documentation at: http://localhost:${PORT}/api/docs`);
-  console.log(`=============================================`);
-});
+if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
+  app.listen(PORT, '0.0.0.0', () => {
+    console.log(`=============================================`);
+    console.log(`🕋 Tahfez Platform Server is running!`);
+    console.log(`🌐 API Base URL: http://0.0.0.0:${PORT}`);
+    console.log(`📚 Swagger documentation at: http://localhost:${PORT}/api/docs`);
+    console.log(`=============================================`);
+  });
+}
+
+export default app;
