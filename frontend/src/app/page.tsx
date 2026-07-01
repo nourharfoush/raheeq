@@ -393,9 +393,9 @@ export default function MarketingPage() {
 
           <div className="space-y-4">
             <h4 className="font-bold text-white text-lg">معلومات التواصل</h4>
-            <p className="text-sm text-emerald-200">القاهرة، جمهورية مصر العربية</p>
-            <p className="text-sm text-emerald-200">بريد إلكتروني: support@tahfez.com</p>
-            <p className="text-sm text-emerald-200">هاتف: 02 20100000</p>
+            <p className="text-sm text-emerald-200">دمنهور ، البحيرة ، جمهورية مصر العربية</p>
+            <p className="text-sm text-emerald-200">بريد إلكتروني: nourharfoush218@gmail.com</p>
+            <p className="text-sm text-emerald-200">هاتف: 00201064620018 </p>
             <div className="flex gap-4 mt-4">
               <span className="text-2xl cursor-pointer hover:scale-110 transition-transform">🐦</span>
               <span className="text-2xl cursor-pointer hover:scale-110 transition-transform">💬</span>
