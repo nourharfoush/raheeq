@@ -27,6 +27,8 @@ app.use(cors({
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
+// Explicitly handle CORS preflight for all routes
+app.options('*', cors());
 app.use(express.json());
 
 // Main marketing or status endpoint
@@ -39,8 +41,10 @@ app.get('/', (_req, res) => {
   });
 });
 
-// Swagger API Documentation
-app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+// Swagger API Documentation (only in non-Vercel environments)
+if (!process.env.VERCEL) {
+  app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+}
 
 // Register API Routes
 app.use('/api/auth', authRoutes);

@@ -28,10 +28,18 @@ const options: swaggerJSDoc.Options = {
       }
     }
   },
-  // Paths to APIs
-  apis: ['./src/modules/**/*.ts', './src/server.ts']
+  // Paths to APIs - use compiled JS paths in production
+  apis: process.env.VERCEL
+    ? [] // Source files not available in Vercel serverless bundle
+    : ['./src/modules/**/*.ts', './src/server.ts']
 };
 
-const swaggerSpec = swaggerJSDoc(options);
+let swaggerSpec: object;
+try {
+  swaggerSpec = swaggerJSDoc(options);
+} catch (e) {
+  console.warn('swagger-jsdoc failed to load (expected in serverless):', e);
+  swaggerSpec = { openapi: '3.0.0', info: { title: 'API', version: '1.0.0' }, paths: {} };
+}
 
 export default swaggerSpec;
