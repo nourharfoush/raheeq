@@ -55,7 +55,7 @@ export default function ParentDashboard() {
   const kidsEvaluations = evaluations.filter(e => myChildrenProfilesIds.includes(e.studentId));
 
   // Find child's user object
-  const childUser = users.find(u => myChildrenUserIds.includes(u.id)) || { name: 'حنين انور حرفوش' };
+  const childUser = users.find(u => myChildrenUserIds.includes(u.id)) || { name: 'حنين انور حسن حرفوش' };
 
   // Calculate pricing
   const planPrices = { once_weekly: 250, twice_weekly: 400 };
@@ -223,7 +223,7 @@ export default function ParentDashboard() {
               <div className="grid lg:grid-cols-2 gap-8">
                 {/* Left side: recent activity logs */}
                 <div className="space-y-4">
-                  <h4 className="font-bold text-sm text-gray-900 dark:text-white">سجل تسميع يوسف الأخير</h4>
+                  <h4 className="font-bold text-sm text-gray-900 dark:text-white">سجل تسميع حنين الأخير</h4>
                   <div className="space-y-3">
                     {kidsLogs.slice(0, 3).map(log => (
                       <div key={log.id} className="p-4 rounded-2xl bg-cream dark:bg-gray-800/40 border border-gray-100 dark:border-gray-800 flex justify-between items-center text-xs">

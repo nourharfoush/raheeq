@@ -271,7 +271,7 @@ export default function MarketingPage() {
                 <div className="w-10 h-10 rounded-full bg-emerald-500/20 text-lg flex items-center justify-center">👩‍💼</div>
                 <div>
                   <h4 className="font-bold text-sm text-gray-900 dark:text-white">أم محمد</h4>
-                  <p className="text-xs text-gray-500">الإسكندرية • ولي أمر الطالب يوسف</p>
+                  <p className="text-xs text-gray-500">الإسكندرية • ولي أمر الطالبة حنين</p>
                 </div>
               </div>
             </div>

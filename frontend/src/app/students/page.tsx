@@ -45,7 +45,7 @@ export default function StudentsPage() {
       setStudents(JSON.parse(saved));
     } else {
       const defaultSeeds: Student[] = [
-        { id: 's-1', name: 'يوسف أحمد الحارثي', nationalIdOrPassport: '31510100101234', phone: '01098765432', email: 'youssef@gmail.com', country: 'مصر', governorate: 'القاهرة', address: 'مصر الجديدة، ش النزهة', level: 'سورة البقرة', attendance: '98%', dateJoined: '2026-01-10' },
+        { id: 's-1', name: 'حنين انور حسن حرفوش', nationalIdOrPassport: '31510100101234', phone: '01098765432', email: 'hanin@gmail.com', country: 'مصر', governorate: 'القاهرة', address: 'مصر الجديدة، ش النزهة', level: 'سورة البقرة', attendance: '98%', dateJoined: '2026-01-10' },
         { id: 's-2', name: 'مريم محمود الشافعي', nationalIdOrPassport: '31705050205678', phone: '01223456789', email: 'maryam@gmail.com', country: 'مصر', governorate: 'الإسكندرية', address: 'سموحة، ش الفوزي', level: 'جزء عم', attendance: '95%', dateJoined: '2026-03-15' },
         { id: 's-3', name: 'عمر عبد الله السنباطي', nationalIdOrPassport: '31308080109876', phone: '01155443322', email: 'omar@gmail.com', country: 'مصر', governorate: 'الغربية', address: 'طنطا، ش البحر', level: 'سورة آل عمران', attendance: '92%', dateJoined: '2026-02-01' }
       ];
