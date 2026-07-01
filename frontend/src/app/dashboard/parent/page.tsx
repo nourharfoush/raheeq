@@ -55,7 +55,7 @@ export default function ParentDashboard() {
   const kidsEvaluations = evaluations.filter(e => myChildrenProfilesIds.includes(e.studentId));
 
   // Find child's user object
-  const childUser = users.find(u => myChildrenUserIds.includes(u.id)) || { name: 'يوسف أحمد الحارثي' };
+  const childUser = users.find(u => myChildrenUserIds.includes(u.id)) || { name: 'حنين انور حرفوش' };
 
   // Calculate pricing
   const planPrices = { once_weekly: 250, twice_weekly: 400 };
