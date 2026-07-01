@@ -58,7 +58,7 @@ async function apiFetch<T>(
 
 export interface ApiUser {
   id: string;
-  email: string;
+  username: string;
   name: string;
   phone?: string;
   role: 'ADMIN' | 'TEACHER' | 'STUDENT' | 'PARENT' | 'SUPERVISOR';
@@ -72,7 +72,7 @@ export interface LoginResponse {
 
 export interface RegisterResponse {
   message: string;
-  email: string;
+  username: string;
   otp?: string;
 }
 
@@ -81,17 +81,17 @@ export interface VerifyOtpResponse {
   user: ApiUser;
 }
 
-export async function apiLogin(email: string, password: string): Promise<LoginResponse> {
+export async function apiLogin(username: string, password: string): Promise<LoginResponse> {
   const data = await apiFetch<LoginResponse>('/auth/login', {
     method: 'POST',
-    body: JSON.stringify({ email, password }),
+    body: JSON.stringify({ username, password }),
   });
   setToken(data.token);
   return data;
 }
 
 export async function apiRegister(
-  email: string,
+  username: string,
   password: string,
   name: string,
   phone: string,
@@ -100,34 +100,34 @@ export async function apiRegister(
 ): Promise<RegisterResponse> {
   return apiFetch<RegisterResponse>('/auth/register', {
     method: 'POST',
-    body: JSON.stringify({ email, password, name, phone, role, parentId }),
+    body: JSON.stringify({ username, password, name, phone, role, parentId }),
   });
 }
 
-export async function apiVerifyOtp(email: string, otp: string): Promise<VerifyOtpResponse> {
+export async function apiVerifyOtp(username: string, otp: string): Promise<VerifyOtpResponse> {
   const data = await apiFetch<VerifyOtpResponse>('/auth/verify-otp', {
     method: 'POST',
-    body: JSON.stringify({ email, otp }),
+    body: JSON.stringify({ username, otp }),
   });
   setToken(data.token);
   return data;
 }
 
-export async function apiResetPassword(email: string): Promise<{ message: string; otp?: string }> {
+export async function apiResetPassword(username: string): Promise<{ message: string; otp?: string }> {
   return apiFetch('/auth/reset-password', {
     method: 'POST',
-    body: JSON.stringify({ email }),
+    body: JSON.stringify({ username }),
   });
 }
 
 export async function apiConfirmReset(
-  email: string,
+  username: string,
   otp: string,
   newPassword: string
 ): Promise<{ message: string }> {
   return apiFetch('/auth/confirm-reset', {
     method: 'POST',
-    body: JSON.stringify({ email, otp, newPassword }),
+    body: JSON.stringify({ username, otp, newPassword }),
   });
 }
 
@@ -151,7 +151,7 @@ export async function apiGetUsers(): Promise<ApiUser[]> {
 }
 
 export async function apiCreateUser(userData: {
-  email: string;
+  username: string;
   password?: string;
   name: string;
   phone?: string;
@@ -167,7 +167,7 @@ export async function apiCreateUser(userData: {
 export async function apiUpdateUser(
   id: string,
   userData: {
-    email?: string;
+    username?: string;
     password?: string;
     name?: string;
     phone?: string;

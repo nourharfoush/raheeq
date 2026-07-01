@@ -12,7 +12,7 @@ export type Role = 'ADMIN' | 'TEACHER' | 'STUDENT' | 'PARENT' | 'SUPERVISOR';
 
 export interface User {
   id: string;
-  email: string;
+  username: string;
   name: string;
   phone?: string;
   role: Role;
@@ -158,18 +158,18 @@ interface AppContextType {
   notifications: Notification[];
   
   // Actions
-  login: (email: string, password: string) => Promise<User>;
-  register: (email: string, name: string, phone: string, role: Role, parentId?: string, password?: string) => Promise<string>;
-  verifyOtp: (email: string, otp: string) => Promise<User>;
-  resetPassword: (email: string) => Promise<string>;
-  confirmReset: (email: string, otp: string, newPass: string) => Promise<boolean>;
+  login: (username: string, password: string) => Promise<User>;
+  register: (username: string, name: string, phone: string, role: Role, parentId?: string, password?: string) => Promise<string>;
+  verifyOtp: (username: string, otp: string) => Promise<User>;
+  resetPassword: (username: string) => Promise<string>;
+  confirmReset: (username: string, otp: string, newPass: string) => Promise<boolean>;
   logout: () => void;
   updateProfile: (name: string, phone: string, bio?: string) => Promise<void>;
   
   // Admin User management
   refreshUsers: () => Promise<void>;
-  addUser: (userData: { email: string; password?: string; name: string; phone?: string; role: Role; isActive?: boolean }) => Promise<void>;
-  updateUser: (id: string, userData: { email?: string; password?: string; name?: string; phone?: string; role?: Role; isActive?: boolean }) => Promise<void>;
+  addUser: (userData: { username: string; password?: string; name: string; phone?: string; role: Role; isActive?: boolean }) => Promise<void>;
+  updateUser: (id: string, userData: { username?: string; password?: string; name?: string; phone?: string; role?: Role; isActive?: boolean }) => Promise<void>;
   deleteUser: (id: string) => Promise<void>;
   
   // Platform management
@@ -230,7 +230,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       // Migration: add passwordHash to admin user if missing (backward compatibility)
       let migrated = false;
       parsedUsers = parsedUsers.map(u => {
-        if (!u.passwordHash && u.email === 'admin@tahfez.com') {
+        if (!u.passwordHash && u.username === 'admin') {
           migrated = true;
           return { ...u, passwordHash: btoa('password123') };
         }
@@ -253,7 +253,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       // ── مستخدم المدير فقط عند التهيئة الأولى ──
       // لا توجد بيانات وهمية — المنصة تبدأ نظيفة تماماً
       const defaultUsers: User[] = [
-        { id: 'u-admin', email: 'admin@tahfez.com', name: 'المدير العام', phone: '0500000001', role: 'ADMIN', isActive: true, passwordHash: btoa('password123') }
+        { id: 'u-admin', username: 'admin', name: 'المدير العام', phone: '0500000001', role: 'ADMIN', isActive: true, passwordHash: btoa('password123') }
       ];
 
       const defaultStudents: StudentProfile[] = [];
@@ -306,11 +306,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   };
 
   // Auth Operations — now backed by the real Express API + PostgreSQL
-  const login = async (email: string, pass: string): Promise<User> => {
-    const { user: apiUser } = await apiLogin(email, pass);
+  const login = async (username: string, pass: string): Promise<User> => {
+    const { user: apiUser } = await apiLogin(username, pass);
     const user: User = {
       id: apiUser.id,
-      email: apiUser.email,
+      username: apiUser.username,
       name: apiUser.name,
       phone: apiUser.phone,
       role: apiUser.role,
@@ -321,17 +321,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     return user;
   };
 
-  const register = async (email: string, name: string, phone: string, role: Role, parentId?: string, password?: string): Promise<string> => {
-    const resp = await apiRegister(email, password || '', name, phone, role, parentId);
+  const register = async (username: string, name: string, phone: string, role: Role, parentId?: string, password?: string): Promise<string> => {
+    const resp = await apiRegister(username, password || '', name, phone, role, parentId);
     // In dev mode, the backend returns the OTP in the response for easy testing
     return resp.otp || resp.message;
   };
 
-  const verifyOtp = async (email: string, otp: string): Promise<User> => {
-    const { user: apiUser } = await apiVerifyOtp(email, otp);
+  const verifyOtp = async (username: string, otp: string): Promise<User> => {
+    const { user: apiUser } = await apiVerifyOtp(username, otp);
     const user: User = {
       id: apiUser.id,
-      email: apiUser.email,
+      username: apiUser.username,
       name: apiUser.name,
       phone: apiUser.phone,
       role: apiUser.role,
@@ -342,13 +342,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     return user;
   };
 
-  const resetPassword = async (email: string): Promise<string> => {
-    const resp = await apiResetPassword(email);
+  const resetPassword = async (username: string): Promise<string> => {
+    const resp = await apiResetPassword(username);
     return resp.otp || resp.message;
   };
 
-  const confirmReset = async (email: string, otp: string, newPass: string): Promise<boolean> => {
-    await apiConfirmReset(email, otp, newPass);
+  const confirmReset = async (username: string, otp: string, newPass: string): Promise<boolean> => {
+    await apiConfirmReset(username, otp, newPass);
     return true;
   };
 
@@ -383,7 +383,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const data = await apiGetUsers();
       const mapped: User[] = data.map((u: any) => ({
         id: u.id,
-        email: u.email,
+        username: u.username,
         name: u.name,
         phone: u.phone,
         role: u.role,
@@ -396,12 +396,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const addUser = async (userData: { email: string; password?: string; name: string; phone?: string; role: Role; isActive?: boolean }) => {
+  const addUser = async (userData: { username: string; password?: string; name: string; phone?: string; role: Role; isActive?: boolean }) => {
     try {
       const newUser = await apiCreateUser(userData);
       const mapped: User = {
         id: newUser.id,
-        email: newUser.email,
+        username: newUser.username,
         name: newUser.name,
         phone: newUser.phone,
         role: newUser.role,
@@ -413,12 +413,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const updateUser = async (id: string, userData: { email?: string; password?: string; name?: string; phone?: string; role?: Role; isActive?: boolean }) => {
+  const updateUser = async (id: string, userData: { username?: string; password?: string; name?: string; phone?: string; role?: Role; isActive?: boolean }) => {
     try {
       const updatedUser = await apiUpdateUser(id, userData);
       const mapped: User = {
         id: updatedUser.id,
-        email: updatedUser.email,
+        username: updatedUser.username,
         name: updatedUser.name,
         phone: updatedUser.phone,
         role: updatedUser.role,

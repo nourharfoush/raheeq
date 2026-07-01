@@ -237,10 +237,10 @@ router.post('/:id/enroll', authenticate, async (req: AuthRequest, res: Response)
     if (!studentId && req.user?.role === 'STUDENT') {
       const student = await prisma.studentProfile.findUnique({ where: { userId: req.user.id } });
       if (student) targetStudentId = student.id;
-    } else if (studentId && studentId.includes('@')) {
-      // If student ID is email, find profile
+    } else if (studentId && !studentId.match(/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/)) {
+      // If student ID is username (not a UUID), find profile
       const studentUser = await prisma.user.findUnique({
-        where: { email: studentId },
+        where: { username: studentId },
         include: { studentProfile: true }
       });
       if (studentUser?.studentProfile) targetStudentId = studentUser.studentProfile.id;

@@ -582,10 +582,10 @@ export default function StudentDashboard() {
               </div>
 
               <div>
-                <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">البريد الإلكتروني (غير قابل للتعديل)</label>
+                <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">اسم المستخدم (غير قابل للتعديل)</label>
                 <input 
-                  type="email"
-                  value={currentUser.email}
+                  type="text"
+                  value={currentUser.username}
                   className="w-full px-4 py-3 rounded-xl border border-gray-100 dark:border-gray-800 bg-gray-100/50 dark:bg-gray-800/20 text-gray-400 text-sm focus:outline-none"
                   disabled
                 />

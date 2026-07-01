@@ -15,7 +15,7 @@ function AuthContent() {
   const [step, setStep] = useState<'form' | 'otp' | 'forgot' | 'reset-otp'>('form');
 
   // Input states
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
@@ -57,7 +57,7 @@ function AuthContent() {
     setError('');
     setMessage('');
     try {
-      const user = await login(email, password);
+      const user = await login(username, password);
       setMessage('تم تسجيل الدخول بنجاح، جاري تحويلك...');
       setTimeout(() => redirectUser(user.role), 1000);
     } catch (err: any) {
@@ -70,7 +70,7 @@ function AuthContent() {
     setError('');
     setMessage('');
     try {
-      const code = await register(email, name, phone, role, parentId, password);
+      const code = await register(username, name, phone, role, parentId, password);
       setDevOtp(code); // store for easy viewing
       setStep('otp');
       setMessage('تم إرسال رمز التحقق (OTP) بنجاح!');
@@ -84,7 +84,7 @@ function AuthContent() {
     setError('');
     setMessage('');
     try {
-      const user = await verifyOtp(email, otp);
+      const user = await verifyOtp(username, otp);
       setMessage('تم تفعيل الحساب والتحقق بنجاح! جاري تحويلك...');
       setTimeout(() => redirectUser(user.role), 1200);
     } catch (err: any) {
@@ -97,12 +97,12 @@ function AuthContent() {
     setError('');
     setMessage('');
     try {
-      const code = await resetPassword(email);
+      const code = await resetPassword(username);
       setDevOtp(code);
       setStep('reset-otp');
-      setMessage('تم إرسال رمز إعادة التعيين لبريدكم الإلكتروني.');
+      setMessage('تم إرسال رمز إعادة التعيين لاسم المستخدم الخاص بكم.');
     } catch (err: any) {
-      setError(err.message || 'البريد الإلكتروني غير مسجل');
+      setError(err.message || 'اسم المستخدم غير مسجل');
     }
   };
 
@@ -111,7 +111,7 @@ function AuthContent() {
     setError('');
     setMessage('');
     try {
-      await confirmReset(email, otp, newPassword);
+      await confirmReset(username, otp, newPassword);
       setMessage('تم تغيير كلمة المرور بنجاح، يمكنك تسجيل الدخول الآن.');
       setStep('form');
       setActiveTab('login');
@@ -184,13 +184,13 @@ function AuthContent() {
         {step === 'form' && activeTab === 'login' && (
           <form onSubmit={handleLogin} className="space-y-6 relative z-10">
             <div>
-              <label className="block text-xs font-bold text-gray-500 mb-2">البريد الإلكتروني التجريبي (student@tahfez.com / teacher@tahfez.com / parent@tahfez.com)</label>
+              <label className="block text-xs font-bold text-gray-500 mb-2">اسم المستخدم التجريبي (student / teacher / parent / admin)</label>
               <div className="relative">
                 <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="email@example.com"
+                  type="text"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  placeholder="اسم المستخدم"
                   className="w-full px-4 py-3.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-cream/30 dark:bg-gray-800/30 text-sm focus:outline-none focus:border-primary"
                   required
                 />
@@ -236,12 +236,12 @@ function AuthContent() {
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-gray-500 mb-1.5">البريد الإلكتروني</label>
+              <label className="block text-xs font-bold text-gray-500 mb-1.5">اسم المستخدم</label>
               <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="example@tahfez.com"
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="اسم المستخدم"
                 className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-cream/30 dark:bg-gray-800/30 text-sm focus:outline-none focus:border-primary"
                 required
               />
@@ -273,12 +273,12 @@ function AuthContent() {
 
             {role === 'STUDENT' && (
               <div>
-                <label className="block text-xs font-bold text-gray-500 mb-1.5">البريد الإلكتروني لولي الأمر (اختياري)</label>
+                <label className="block text-xs font-bold text-gray-500 mb-1.5">اسم المستخدم لولي الأمر (اختياري)</label>
                 <input
-                  type="email"
+                  type="text"
                   value={parentId}
                   onChange={(e) => setParentId(e.target.value)}
-                  placeholder="parent@tahfez.com"
+                  placeholder="parent"
                   className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-cream/30 dark:bg-gray-800/30 text-sm focus:outline-none focus:border-primary"
                 />
               </div>
@@ -309,7 +309,7 @@ function AuthContent() {
         {step === 'otp' && (
           <form onSubmit={handleVerifyOtp} className="space-y-6 relative z-10">
             <div className="text-center text-sm text-gray-500">
-              أدخلنا رمز التحقق المؤلف من 6 أرقام إلى البريد الإلكتروني <strong className="text-gray-700 dark:text-gray-300">{email}</strong>
+              أدخل رمز التحقق المؤلف من 6 أرقام لاسم المستخدم <strong className="text-gray-700 dark:text-gray-300">{username}</strong>
             </div>
 
             {devOtp && (
@@ -342,13 +342,13 @@ function AuthContent() {
         {/* Forgot password request */}
         {step === 'forgot' && (
           <form onSubmit={handleForgotPassword} className="space-y-6 relative z-10">
-            <div className="text-center text-sm text-gray-500">أدخل بريدك الإلكتروني لإرسال رمز التحقق لتغيير كلمة المرور الخاصة بك.</div>
+            <div className="text-center text-sm text-gray-500">أدخل اسم المستخدم لإرسال رمز التحقق لتغيير كلمة المرور الخاصة بك.</div>
 
             <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="email@tahfez.com"
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              placeholder="اسم المستخدم"
               className="w-full px-4 py-3.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-cream/30 dark:bg-gray-800/30 text-sm focus:outline-none focus:border-primary"
               required
             />

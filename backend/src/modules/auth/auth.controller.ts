@@ -44,16 +44,16 @@ const otpStore: Record<string, { otp: string; expires: number; tempUserData?: an
  *         description: خطأ في البيانات المرسلة أو البريد الإلكتروني مسجل مسبقاً
  */
 router.post('/register', async (req, res) => {
-  const { email, password, name, phone, role, parentId } = req.body;
+  const { username, password, name, phone, role, parentId } = req.body;
 
-  if (!email || !password || !name || !role) {
-    return res.status(400).json({ error: 'الرجاء تعبئة جميع الحقول المطلوبة (البريد الإلكتروني، كلمة المرور، الاسم، الدور)' });
+  if (!username || !password || !name || !role) {
+    return res.status(400).json({ error: 'الرجاء تعبئة جميع الحقول المطلوبة (اسم المستخدم، كلمة المرور، الاسم، الدور)' });
   }
 
   try {
-    const existingUser = await prisma.user.findUnique({ where: { email } });
+    const existingUser = await prisma.user.findUnique({ where: { username } });
     if (existingUser) {
-      return res.status(400).json({ error: 'هذا البريد الإلكتروني مسجل بالفعل لدينا' });
+      return res.status(400).json({ error: 'اسم المستخدم هذا مسجل بالفعل لدينا' });
     }
 
     // Hash password
@@ -63,17 +63,17 @@ router.post('/register', async (req, res) => {
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     const expires = Date.now() + 5 * 60 * 1000;
 
-    otpStore[email] = {
+    otpStore[username] = {
       otp,
       expires,
-      tempUserData: { email, passwordHash, name, phone, role, parentId }
+      tempUserData: { username, passwordHash, name, phone, role, parentId }
     };
 
-    console.log(`[DEVELOPMENT OTP] Code for ${email} is: ${otp}`);
+    console.log(`[DEVELOPMENT OTP] Code for ${username} is: ${otp}`);
 
     return res.status(200).json({
-      message: 'تم إرسال رمز التحقق (OTP) بنجاح لبريدك الإلكتروني (تجريبياً: يرجى مراجعة كونسول الباك إند لرؤية الرمز)',
-      email,
+      message: 'تم إرسال رمز التحقق (OTP) بنجاح لاسم المستخدم الخاص بك (تجريبياً: يرجى مراجعة كونسول الباك إند لرؤية الرمز)',
+      username,
       otp, // Returned in dev mode for easy frontend testing
     });
   } catch (error: any) {
@@ -107,19 +107,19 @@ router.post('/register', async (req, res) => {
  *         description: الرمز غير صحيح أو منتهي الصلاحية
  */
 router.post('/verify-otp', async (req, res) => {
-  const { email, otp } = req.body;
+  const { username, otp } = req.body;
 
-  if (!email || !otp) {
-    return res.status(400).json({ error: 'الرجاء توفير البريد الإلكتروني ورمز التحقق' });
+  if (!username || !otp) {
+    return res.status(400).json({ error: 'الرجاء توفير اسم المستخدم ورمز التحقق' });
   }
 
-  const stored = otpStore[email];
+  const stored = otpStore[username];
   if (!stored) {
-    return res.status(400).json({ error: 'لا يوجد طلب تحقق نشط لهذا البريد الإلكتروني' });
+    return res.status(400).json({ error: 'لا يوجد طلب تحقق نشط لهذا الاسم' });
   }
 
   if (Date.now() > stored.expires) {
-    delete otpStore[email];
+    delete otpStore[username];
     return res.status(400).json({ error: 'انتهت صلاحية رمز التحقق، يرجى طلب رمز جديد' });
   }
 
@@ -132,7 +132,7 @@ router.post('/verify-otp', async (req, res) => {
   try {
     const user = await prisma.user.create({
       data: {
-        email,
+        username,
         passwordHash,
         name,
         phone,
@@ -144,7 +144,7 @@ router.post('/verify-otp', async (req, res) => {
     if (role === 'STUDENT') {
       let finalParentId = null;
       if (parentId) {
-        const parent = await prisma.parentProfile.findFirst({ where: { user: { email: parentId } } });
+        const parent = await prisma.parentProfile.findFirst({ where: { user: { username: parentId } } });
         if (parent) finalParentId = parent.id;
       }
       await prisma.studentProfile.create({
@@ -161,17 +161,17 @@ router.post('/verify-otp', async (req, res) => {
     }
 
     // Auto delete from store
-    delete otpStore[email];
+    delete otpStore[username];
 
     // Generate Token
-    const token = jwt.sign({ id: user.id, email: user.email, role: user.role }, JWT_SECRET, { expiresIn: '7d' });
+    const token = jwt.sign({ id: user.id, username: user.username, role: user.role }, JWT_SECRET, { expiresIn: '7d' });
 
     return res.status(201).json({
       message: 'تم تفعيل الحساب وإنشاؤه بنجاح!',
       token,
       user: {
         id: user.id,
-        email: user.email,
+        username: user.username,
         name: user.name,
         role: user.role
       }
@@ -207,31 +207,31 @@ router.post('/verify-otp', async (req, res) => {
  *         description: بيانات الاعتماد غير صحيحة
  */
 router.post('/login', async (req, res) => {
-  const { email, password } = req.body;
+  const { username, password } = req.body;
 
-  if (!email || !password) {
-    return res.status(400).json({ error: 'الرجاء إدخال البريد الإلكتروني وكلمة المرور' });
+  if (!username || !password) {
+    return res.status(400).json({ error: 'الرجاء إدخال اسم المستخدم وكلمة المرور' });
   }
 
   try {
-    const user = await prisma.user.findUnique({ where: { email } });
+    const user = await prisma.user.findUnique({ where: { username } });
     if (!user || !user.isActive) {
-      return res.status(401).json({ error: 'البريد الإلكتروني أو كلمة المرور غير صحيحة، أو الحساب غير مفعل' });
+      return res.status(401).json({ error: 'اسم المستخدم أو كلمة المرور غير صحيحة، أو الحساب غير مفعل' });
     }
 
     const isMatch = await bcrypt.compare(password, user.passwordHash);
     if (!isMatch) {
-      return res.status(401).json({ error: 'البريد الإلكتروني أو كلمة المرور غير صحيحة' });
+      return res.status(401).json({ error: 'اسم المستخدم أو كلمة المرور غير صحيحة' });
     }
 
-    const token = jwt.sign({ id: user.id, email: user.email, role: user.role }, JWT_SECRET, { expiresIn: '7d' });
+    const token = jwt.sign({ id: user.id, username: user.username, role: user.role }, JWT_SECRET, { expiresIn: '7d' });
 
     return res.status(200).json({
       message: 'تم تسجيل الدخول بنجاح',
       token,
       user: {
         id: user.id,
-        email: user.email,
+        username: user.username,
         name: user.name,
         role: user.role,
         avatarUrl: user.avatarUrl
@@ -264,12 +264,12 @@ router.get('/profile', authenticate, async (req: AuthRequest, res: Response) => 
       include: {
         studentProfile: {
           include: {
-            parent: { include: { user: { select: { name: true, email: true } } } }
+            parent: { include: { user: { select: { name: true, username: true } } } }
           }
         },
         parentProfile: {
           include: {
-            children: { include: { user: { select: { id: true, name: true, email: true } } } }
+            children: { include: { user: { select: { id: true, name: true, username: true } } } }
           }
         },
         teacherProfile: true
@@ -342,7 +342,7 @@ router.put('/profile', authenticate, async (req: AuthRequest, res: Response) => 
       message: 'تم تحديث الملف الشخصي بنجاح',
       user: {
         id: updatedUser.id,
-        email: updatedUser.email,
+        username: updatedUser.username,
         name: updatedUser.name,
         role: updatedUser.role,
         avatarUrl: updatedUser.avatarUrl
@@ -375,28 +375,28 @@ router.put('/profile', authenticate, async (req: AuthRequest, res: Response) => 
  *         description: تم إرسال الرمز بنجاح
  */
 router.post('/reset-password', async (req, res) => {
-  const { email } = req.body;
-  if (!email) return res.status(400).json({ error: 'الرجاء توفير البريد الإلكتروني' });
+  const { username } = req.body;
+  if (!username) return res.status(400).json({ error: 'الرجاء توفير اسم المستخدم' });
 
   try {
-    const user = await prisma.user.findUnique({ where: { email } });
+    const user = await prisma.user.findUnique({ where: { username } });
     if (!user) {
       // Avoid enum user existence for security
-      return res.status(200).json({ message: 'إذا كان البريد الإلكتروني مسجلاً لدينا، فقد أرسلنا رمز إعادة التعيين إليه' });
+      return res.status(200).json({ message: 'إذا كان اسم المستخدم مسجلاً لدينا، فقد أرسلنا رمز إعادة التعيين إليه' });
     }
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    otpStore[email] = {
+    otpStore[username] = {
       otp,
       expires: Date.now() + 5 * 60 * 1000,
-      tempUserData: { email, reset: true }
+      tempUserData: { username, reset: true }
     };
 
-    console.log(`[DEVELOPMENT RESET OTP] Code for ${email} is: ${otp}`);
+    console.log(`[DEVELOPMENT RESET OTP] Code for ${username} is: ${otp}`);
 
     return res.status(200).json({
-      message: 'تم إرسال رمز إعادة تعيين كلمة المرور بنجاح لبريدك الإلكتروني (تجريبياً: يرجى مراجعة كونسول الباك إند لرؤية الرمز)',
-      email,
+      message: 'تم إرسال رمز إعادة تعيين كلمة المرور بنجاح لاسم المستخدم الخاص بك (تجريبياً: يرجى مراجعة كونسول الباك إند لرؤية الرمز)',
+      username,
       otp, // Returned in dev mode for easy frontend testing
     });
   } catch (error) {
@@ -416,9 +416,9 @@ router.post('/reset-password', async (req, res) => {
  *         application/json:
  *           schema:
  *             type: object
- *             required: [email, otp, newPassword]
+ *             required: [username, otp, newPassword]
  *             properties:
- *               email:
+ *               username:
  *                 type: string
  *               otp:
  *                 type: string
@@ -429,18 +429,18 @@ router.post('/reset-password', async (req, res) => {
  *         description: تم تعيين كلمة المرور بنجاح
  */
 router.post('/confirm-reset', async (req, res) => {
-  const { email, otp, newPassword } = req.body;
-  if (!email || !otp || !newPassword) {
+  const { username, otp, newPassword } = req.body;
+  if (!username || !otp || !newPassword) {
     return res.status(400).json({ error: 'الرجاء تعبئة جميع الحقول المطلوبة' });
   }
 
-  const stored = otpStore[email];
+  const stored = otpStore[username];
   if (!stored || !stored.tempUserData.reset) {
-    return res.status(400).json({ error: 'لا يوجد طلب استعادة نشط لهذا البريد الإلكتروني' });
+    return res.status(400).json({ error: 'لا يوجد طلب استعادة نشط لهذا المستخدم' });
   }
 
   if (Date.now() > stored.expires) {
-    delete otpStore[email];
+    delete otpStore[username];
     return res.status(400).json({ error: 'انتهت صلاحية الرمز' });
   }
 
@@ -451,11 +451,11 @@ router.post('/confirm-reset', async (req, res) => {
   try {
     const passwordHash = await bcrypt.hash(newPassword, 10);
     await prisma.user.update({
-      where: { email },
+      where: { username },
       data: { passwordHash }
     });
 
-    delete otpStore[email];
+    delete otpStore[username];
     return res.status(200).json({ message: 'تم تغيير كلمة المرور بنجاح، يمكنك تسجيل الدخول الآن' });
   } catch (error) {
     return res.status(500).json({ error: 'حدث خطأ أثناء تحديث كلمة المرور' });
@@ -471,7 +471,7 @@ router.get('/users', authenticate, authorize(['ADMIN']), async (_req: AuthReques
       orderBy: { createdAt: 'desc' },
       select: {
         id: true,
-        email: true,
+        username: true,
         name: true,
         phone: true,
         role: true,
@@ -488,19 +488,19 @@ router.get('/users', authenticate, authorize(['ADMIN']), async (_req: AuthReques
 
 // Create new user
 router.post('/users', authenticate, authorize(['ADMIN']), async (req: AuthRequest, res: Response) => {
-  const { email, password, name, phone, role, isActive } = req.body;
-  if (!email || !password || !name || !role) {
-    return res.status(400).json({ error: 'الرجاء تعبئة الحقول المطلوبة (البريد، كلمة المرور، الاسم، الدور)' });
+  const { username, password, name, phone, role, isActive } = req.body;
+  if (!username || !password || !name || !role) {
+    return res.status(400).json({ error: 'الرجاء تعبئة الحقول المطلوبة (اسم المستخدم، كلمة المرور، الاسم، الدور)' });
   }
   try {
-    const existing = await prisma.user.findUnique({ where: { email } });
+    const existing = await prisma.user.findUnique({ where: { username } });
     if (existing) {
-      return res.status(400).json({ error: 'البريد الإلكتروني مسجل مسبقاً' });
+      return res.status(400).json({ error: 'اسم المستخدم مسجل مسبقاً' });
     }
     const passwordHash = await bcrypt.hash(password, 10);
     const newUser = await prisma.user.create({
       data: {
-        email,
+        username,
         passwordHash,
         name,
         phone,
@@ -529,10 +529,10 @@ router.post('/users', authenticate, authorize(['ADMIN']), async (req: AuthReques
 // Update user details or toggle active status
 router.put('/users/:id', authenticate, authorize(['ADMIN']), async (req: AuthRequest, res: Response) => {
   const { id } = req.params;
-  const { email, password, name, phone, role, isActive } = req.body;
+  const { username, password, name, phone, role, isActive } = req.body;
   try {
     const dataToUpdate: any = {};
-    if (email) dataToUpdate.email = email;
+    if (username) dataToUpdate.username = username;
     if (name) dataToUpdate.name = name;
     if (phone !== undefined) dataToUpdate.phone = phone;
     if (role) dataToUpdate.role = role;
@@ -545,7 +545,7 @@ router.put('/users/:id', authenticate, authorize(['ADMIN']), async (req: AuthReq
       data: dataToUpdate,
       select: {
         id: true,
-        email: true,
+        username: true,
         name: true,
         phone: true,
         role: true,

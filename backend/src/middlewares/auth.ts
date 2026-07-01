@@ -6,7 +6,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'tahfez-secret-key-change-in-prod';
 export interface AuthRequest extends Request {
   user?: {
     id: string;
-    email: string;
+    username: string;
     role: 'ADMIN' | 'TEACHER' | 'STUDENT' | 'PARENT';
   };
 }

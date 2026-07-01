@@ -372,7 +372,7 @@ export default function TeacherDashboard() {
                           <div className="w-10 h-10 rounded-full bg-emerald-500/10 text-lg flex items-center justify-center font-bold">👦</div>
                           <div>
                             <h4 className="font-bold text-sm text-gray-900 dark:text-white">{studentUser.name}</h4>
-                            <p className="text-xs text-gray-500">{studentUser.email}</p>
+                            <p className="text-xs text-gray-500">{studentUser.username}</p>
                           </div>
                         </div>
                         <button

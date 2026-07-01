@@ -37,7 +37,7 @@ function AdminDashboardContent() {
   const [isUserModalOpen, setIsUserModalOpen] = useState(false);
   const [editUserId, setEditUserId] = useState<string | null>(null);
   const [formName, setFormName] = useState('');
-  const [formEmail, setFormEmail] = useState('');
+  const [formUsername, setFormUsername] = useState('');
   const [formPassword, setFormPassword] = useState('');
   const [formPhone, setFormPhone] = useState('');
   const [formRole, setFormRole] = useState<'ADMIN' | 'TEACHER' | 'STUDENT' | 'PARENT'>('STUDENT');
@@ -126,7 +126,7 @@ function AdminDashboardContent() {
   const openAddUserModal = () => {
     setEditUserId(null);
     setFormName('');
-    setFormEmail('');
+    setFormUsername('');
     setFormPassword('');
     setFormPhone('');
     setFormRole('STUDENT');
@@ -139,7 +139,7 @@ function AdminDashboardContent() {
   const openEditUserModal = (u: any) => {
     setEditUserId(u.id);
     setFormName(u.name);
-    setFormEmail(u.email);
+    setFormUsername(u.username);
     setFormPassword(''); // leave blank unless updating
     setFormPhone(u.phone || '');
     setFormRole(u.role);
@@ -158,7 +158,7 @@ function AdminDashboardContent() {
         // Edit mode
         await updateUser(editUserId, {
           name: formName,
-          email: formEmail,
+          username: formUsername,
           password: formPassword || undefined,
           phone: formPhone || undefined,
           role: formRole,
@@ -173,7 +173,7 @@ function AdminDashboardContent() {
         }
         await addUser({
           name: formName,
-          email: formEmail,
+          username: formUsername,
           password: formPassword,
           phone: formPhone || undefined,
           role: formRole,
@@ -510,7 +510,7 @@ function AdminDashboardContent() {
                   <thead>
                     <tr className="border-b border-gray-200 dark:border-gray-800 text-gray-400 font-bold text-xs">
                       <th className="pb-3">الاسم</th>
-                      <th className="pb-3">البريد الإلكتروني</th>
+                      <th className="pb-3">اسم المستخدم</th>
                       <th className="pb-3">الدور</th>
                       <th className="pb-3">الجوال</th>
                       <th className="pb-3 text-center">الحالة</th>
@@ -522,7 +522,7 @@ function AdminDashboardContent() {
                       .filter(u => {
                         const searchLower = userSearch.toLowerCase();
                         const matchesSearch = u.name.toLowerCase().includes(searchLower) || 
-                                              u.email.toLowerCase().includes(searchLower) ||
+                                              u.username.toLowerCase().includes(searchLower) ||
                                               (u.phone && u.phone.includes(userSearch));
                         const matchesRole = userRoleFilter === 'ALL' || u.role === userRoleFilter;
                         return matchesSearch && matchesRole;
@@ -530,7 +530,7 @@ function AdminDashboardContent() {
                       .map(u => (
                         <tr key={u.id} className="text-gray-700 dark:text-gray-300 hover:bg-gray-50/50 dark:hover:bg-gray-800/20 transition-colors">
                           <td className="py-3.5 font-bold">{u.name}</td>
-                          <td className="py-3.5 text-xs font-mono">{u.email}</td>
+                          <td className="py-3.5 text-xs font-mono">{u.username}</td>
                           <td className="py-3.5">{roleBadge(u.role)}</td>
                           <td className="py-3.5 text-xs font-mono">{u.phone || '—'}</td>
                           <td className="py-3.5 text-center">
@@ -579,7 +579,7 @@ function AdminDashboardContent() {
                     </h3>
                     <button
                       onClick={() => setIsUserModalOpen(false)}
-                      className="text-gray-400 hover:text-gray-600 dark:hover:text-white text-lg font-bold"
+                      className="text-gray-400 hover:text-gray-600 dark:hover:white text-lg font-bold"
                     >
                       ✕
                     </button>
@@ -611,15 +611,15 @@ function AdminDashboardContent() {
                       />
                     </div>
 
-                    {/* Email */}
+                    {/* Username */}
                     <div>
-                      <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">البريد الإلكتروني</label>
+                      <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">اسم المستخدم</label>
                       <input
-                        type="email"
-                        value={formEmail}
-                        onChange={e => setFormEmail(e.target.value)}
-                        placeholder="user@tahfez.com"
-                        className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-cream/30 dark:bg-gray-800/30 text-xs focus:outline-none focus:ring-2 focus:ring-primary/20 text-left font-mono"
+                        type="text"
+                        value={formUsername}
+                        onChange={e => setFormUsername(e.target.value)}
+                        placeholder="اسم المستخدم"
+                        className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-cream/30 dark:bg-gray-800/30 text-xs focus:outline-none focus:ring-2 focus:ring-primary/20 text-right font-mono"
                         required
                       />
                     </div>
