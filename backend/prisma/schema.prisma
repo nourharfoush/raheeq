@@ -1,0 +1,254 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  ADMIN
+  TEACHER
+  STUDENT
+  PARENT
+}
+
+enum HalaqaType {
+  INDIVIDUAL
+  GROUP
+}
+
+enum SessionStatus {
+  SCHEDULED
+  LIVE
+  COMPLETED
+  CANCELLED
+}
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+  LATE
+}
+
+enum TajweedGrade {
+  EXCELLENT
+  GOOD
+  ACCEPTABLE
+  NEED_WORK
+}
+
+enum EvaluationType {
+  DAILY
+  TEST
+  EXAM
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  EXPIRED
+  CANCELLED
+}
+
+enum PlanStatus {
+  ACTIVE
+  COMPLETED
+  PENDING
+}
+
+model User {
+  id           String        @id @default(uuid())
+  email        String        @unique
+  passwordHash String
+  name         String
+  phone        String?
+  role         Role          @default(STUDENT)
+  avatarUrl    String?
+  isActive     Boolean       @default(true)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  
+  // Relations
+  studentProfile StudentProfile?
+  parentProfile  ParentProfile?
+  teacherProfile TeacherProfile?
+  notifications  Notification[]
+  subscriptions  Subscription[]
+}
+
+model ParentProfile {
+  id        String           @id @default(uuid())
+  userId    String           @unique
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+  
+  // Relations
+  children  StudentProfile[]
+}
+
+model StudentProfile {
+  id        String           @id @default(uuid())
+  userId    String           @unique
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  parentId  String?
+  parent    ParentProfile?   @relation(fields: [parentId], references: [id], onDelete: SetNull)
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+  
+  // Relations
+  halaqat           HalaqaStudent[]
+  plans             MemorizationPlan[]
+  progressLogs      ProgressLog[]
+  evaluations       Evaluation[]
+  attendanceRecords Attendance[]
+}
+
+model TeacherProfile {
+  id        String           @id @default(uuid())
+  userId    String           @unique
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bio       String?
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+  
+  // Relations
+  halaqat     Halaqa[]
+  evaluations Evaluation[]
+}
+
+model Halaqa {
+  id          String        @id @default(uuid())
+  name        String
+  description String?
+  type        HalaqaType    @default(GROUP)
+  capacity    Int           @default(10)
+  schedule    Json          // E.g., [{"day": "Saturday", "time": "16:00"}]
+  teacherId   String
+  teacher     TeacherProfile @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  
+  // Relations
+  students HalaqaStudent[]
+  sessions Session[]
+}
+
+model HalaqaStudent {
+  id        String         @id @default(uuid())
+  halaqaId  String
+  studentId String
+  joinedAt  DateTime       @default(now())
+  
+  halaqa    Halaqa         @relation(fields: [halaqaId], references: [id], onDelete: Cascade)
+  student   StudentProfile @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([halaqaId, studentId])
+}
+
+model Session {
+  id           String        @id @default(uuid())
+  halaqaId     String
+  halaqa       Halaqa        @relation(fields: [halaqaId], references: [id], onDelete: Cascade)
+  title        String
+  description  String?
+  startTime    DateTime
+  endTime      DateTime
+  status       SessionStatus @default(SCHEDULED)
+  liveUrl      String?
+  recordingUrl String?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  
+  // Relations
+  attendance Attendance[]
+}
+
+model Attendance {
+  id        String           @id @default(uuid())
+  sessionId String
+  session   Session          @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  studentId String
+  student   StudentProfile   @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  status    AttendanceStatus @default(PRESENT)
+  notes     String?
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+
+  @@unique([sessionId, studentId])
+}
+
+model MemorizationPlan {
+  id          String         @id @default(uuid())
+  studentId   String
+  student     StudentProfile @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  title       String
+  description String?
+  targetSurah String
+  targetAyah  Int
+  targetJuz   Int
+  startDate   DateTime
+  endDate     DateTime
+  status      PlanStatus     @default(ACTIVE)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  progressLogs ProgressLog[]
+}
+
+model ProgressLog {
+  id          String           @id @default(uuid())
+  studentId   String
+  student     StudentProfile   @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  planId      String?
+  plan        MemorizationPlan? @relation(fields: [planId], references: [id], onDelete: SetNull)
+  surah       String
+  startAyah   Int
+  endAyah     Int
+  pagesCount  Int
+  isRevision  Boolean          @default(false)
+  date        DateTime         @default(now())
+  notes       String?
+  createdAt   DateTime         @default(now())
+}
+
+model Evaluation {
+  id               String         @id @default(uuid())
+  studentId        String
+  student          StudentProfile @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  evaluatorId      String
+  evaluator        TeacherProfile @relation(fields: [evaluatorId], references: [id], onDelete: Cascade)
+  score            Int            // 0 to 100
+  mistakesCount    Int            @default(0)
+  hesitationsCount Int            @default(0)
+  tajweedGrade     TajweedGrade   @default(EXCELLENT)
+  type             EvaluationType @default(DAILY)
+  notes            String?
+  certificateUrl   String?        // URL to printable certificate PDF / image
+  createdAt        DateTime       @default(now())
+}
+
+model Subscription {
+  id             String             @id @default(uuid())
+  userId         String
+  user           User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  planType       String             // "monthly", "quarterly"
+  status         SubscriptionStatus @default(ACTIVE)
+  amount         Float
+  startDate      DateTime           @default(now())
+  endDate        DateTime
+  paymentIntentId String?
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  content   String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+}

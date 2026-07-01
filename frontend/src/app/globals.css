@@ -1,0 +1,52 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --color-primary: #064e3b; /* زمردي داكن */
+  --color-primary-light: #0f766e; /* زمردي متوسط */
+  --color-gold: #b45309; /* ذهبي ملوكي */
+  --color-gold-light: #f59e0b; /* ذهبي فاتح */
+  --color-cream: #FCFBF7; /* خلفية كريمية دافئة */
+  --color-dark-bg: #0B0F19; /* خلفية الوضع الداكن */
+  
+  --font-sans: var(--font-cairo), sans-serif;
+  --font-quran: var(--font-quran), serif;
+}
+
+:root {
+  --background: #FCFBF7;
+  --foreground: #1F2937;
+}
+
+.dark {
+  --background: #0B0F19;
+  --foreground: #F3F4F6;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.quran-text {
+  font-family: var(--font-quran);
+  line-height: 2.2;
+}
+
+/* Glassmorphism utility */
+.glass-card {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.04);
+}
+
+.dark .glass-card {
+  background: rgba(17, 24, 39, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+}
+
