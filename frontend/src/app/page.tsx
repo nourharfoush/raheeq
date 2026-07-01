@@ -124,7 +124,7 @@ export default function MarketingPage() {
 
               <div className="space-y-3">
                 <div className="flex justify-between text-xs font-bold text-gray-600 dark:text-gray-300">
-                  <span>نسبة إنجاز خطة يوسف الحارثي</span>
+                  <span>نسبة إنجاز خطة حنين انور حسن حرفوش</span>
                   <span className="text-gold">%75</span>
                 </div>
                 <div className="w-full h-2.5 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
