@@ -49,9 +49,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     switch (role) {
       case 'ADMIN':
         return [
-          { name: 'لوحة الإحصائيات', href: '/dashboard/admin', icon: '📊' },
+          { name: 'لوحة الإحصائيات', href: '/dashboard/admin?tab=overview', icon: '📊' },
           { name: 'إدارة المستخدمين', href: '/dashboard/admin?tab=users', icon: '👥' },
           { name: 'المسجلين الجدد', href: '/dashboard/admin?tab=applicants', icon: '📨' },
+          { name: 'الاشتراكات والإيرادات', href: '/dashboard/admin?tab=subscriptions', icon: '💳' },
           { name: 'المحفظين', href: '/teachers', icon: '👳‍♂️' },
           { name: 'الدارسين', href: '/students', icon: '👦' },
           { name: 'الحلقات', href: '/halaqat', icon: '🕋' },

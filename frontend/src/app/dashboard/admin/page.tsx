@@ -229,30 +229,6 @@ function AdminDashboardContent() {
     <DashboardLayout>
       <div className="p-6 sm:p-8 lg:p-12 min-h-screen bg-cream dark:bg-dark-bg text-gray-800 dark:text-gray-200 font-sans pb-12">
         
-        {/* Horizontal Tab Navigation */}
-        <div className="flex gap-2 pb-4 mb-8 border-b border-gray-200 dark:border-gray-800 overflow-x-auto">
-          {(['overview','users','applicants','halaqat','subscriptions'] as const).map(tab => (
-            <button
-              key={tab}
-              onClick={() => {
-                setActiveSubTab(tab);
-                router.push(`/dashboard/admin?tab=${tab}`);
-              }}
-              className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all shrink-0 ${
-                activeSubTab === tab
-                  ? 'bg-primary text-white shadow-md'
-                  : 'bg-white dark:bg-gray-900 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800'
-              }`}
-            >
-              {tab === 'overview' && '📊 لوحة الإحصائيات'}
-              {tab === 'users' && '👥 إدارة المستخدمين'}
-              {tab === 'applicants' && '📨 المسجلين الجدد'}
-              {tab === 'halaqat' && '🕌 إدارة الحلقات'}
-              {tab === 'subscriptions' && '💳 الاشتراكات والإيرادات'}
-            </button>
-          ))}
-        </div>
-
         {/* Header */}
         <header className="flex justify-between items-center mb-8">
           <div>
