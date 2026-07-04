@@ -253,3 +253,21 @@ model Notification {
   isRead    Boolean  @default(false)
   createdAt DateTime @default(now())
 }
+
+model Applicant {
+  id              String   @id @default(uuid())
+  name            String
+  nationalId      String   // الرقم القومي أو رقم جواز السفر
+  country         String   // الدولة
+  email           String?  // البريد الإلكتروني (إن وجد)
+  packageName     String   // الباقة المختارة
+  whatsapp        String   // رقم الجوال/الواتساب للتواصل
+  siblings        String?  // أسماء الأخوة الآخرين (في حال باقة الإخوة)
+  isMemorized     Boolean  @default(false) // هل يحفظ شيئاً من القرآن؟
+  memorizedSurahs String?  // مقدار الحفظ الحالي (عدد الأجزاء أو أسماء السور)
+  memorizeStart   String?  // اتجاه الحفظ: البقرة (FROM_BAQARAH) أو الناس (FROM_NAS)
+  status          String   @default("PENDING") // PENDING, APPROVED, REJECTED
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+

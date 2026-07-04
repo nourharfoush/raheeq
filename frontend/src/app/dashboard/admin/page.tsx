@@ -14,13 +14,14 @@ function AdminDashboardContent() {
     currentUser, loading, users, halaqat, sessions, subscriptions, 
     progressLogs, studentProfiles, evaluations,
     createHalaqa, theme,
-    addUser, updateUser, deleteUser, refreshUsers
+    addUser, updateUser, deleteUser, refreshUsers,
+    applicants, refreshApplicants, updateApplicantStatus, deleteApplicant
   } = useApp();
 
-  const [activeSubTab, setActiveSubTab] = useState<'overview' | 'users' | 'halaqat' | 'subscriptions'>('overview');
+  const [activeSubTab, setActiveSubTab] = useState<'overview' | 'users' | 'halaqat' | 'subscriptions' | 'applicants'>('overview');
 
   useEffect(() => {
-    if (tabParam === 'users' || tabParam === 'halaqat' || tabParam === 'subscriptions' || tabParam === 'overview') {
+    if (tabParam === 'users' || tabParam === 'halaqat' || tabParam === 'subscriptions' || tabParam === 'overview' || tabParam === 'applicants') {
       setActiveSubTab(tabParam as any);
     }
   }, [tabParam]);
@@ -230,7 +231,7 @@ function AdminDashboardContent() {
         
         {/* Horizontal Tab Navigation */}
         <div className="flex gap-2 pb-4 mb-8 border-b border-gray-200 dark:border-gray-800 overflow-x-auto">
-          {(['overview','users','halaqat','subscriptions'] as const).map(tab => (
+          {(['overview','users','applicants','halaqat','subscriptions'] as const).map(tab => (
             <button
               key={tab}
               onClick={() => {
@@ -245,6 +246,7 @@ function AdminDashboardContent() {
             >
               {tab === 'overview' && '📊 لوحة الإحصائيات'}
               {tab === 'users' && '👥 إدارة المستخدمين'}
+              {tab === 'applicants' && '📨 المسجلين الجدد'}
               {tab === 'halaqat' && '🕌 إدارة الحلقات'}
               {tab === 'subscriptions' && '💳 الاشتراكات والإيرادات'}
             </button>
@@ -257,6 +259,7 @@ function AdminDashboardContent() {
             <h2 className="text-2xl font-extrabold text-primary dark:text-white">
               {activeSubTab === 'overview'      && 'الإحصائيات الحقيقية للمنصة'}
               {activeSubTab === 'users'         && 'سجل أعضاء المنصة'}
+              {activeSubTab === 'applicants'    && 'طلبات التقديم والتسجيل الجديد'}
               {activeSubTab === 'halaqat'       && 'إنشاء وإدارة الحلقات الدراسية'}
               {activeSubTab === 'subscriptions' && 'تقارير الاشتراكات والمدفوعات'}
             </h2>
@@ -803,6 +806,156 @@ function AdminDashboardContent() {
                       );
                     })
                   }
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* ══════════════ APPLICANTS TAB ══════════════ */}
+        {activeSubTab === 'applicants' && (
+          <div className="p-6 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-3xl shadow-sm space-y-6 animate-in fade-in duration-200">
+            <div className="flex justify-between items-center flex-wrap gap-4">
+              <h3 className="font-extrabold text-lg text-gray-900 dark:text-white">طلبات التسجيل الجديد للمراجعة والقبول</h3>
+              <button
+                onClick={refreshApplicants}
+                className="px-3 py-1.5 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 text-xs font-bold text-gray-500"
+              >
+                🔄 تحديث الطلبات
+              </button>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-right text-sm">
+                <thead>
+                  <tr className="border-b border-gray-200 dark:border-gray-800 text-gray-400 font-bold text-xs">
+                    <th className="pb-3">الاسم</th>
+                    <th className="pb-3">الباقة</th>
+                    <th className="pb-3">الهوية / الجواز</th>
+                    <th className="pb-3">الدولة</th>
+                    <th className="pb-3">رقم الواتساب</th>
+                    <th className="pb-3">تفاصيل الحفظ والأشقاء</th>
+                    <th className="pb-3 text-center">الحالة</th>
+                    <th className="pb-3 text-center">الإجراءات</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+                  {applicants.length === 0 ? (
+                    <tr>
+                      <td colSpan={8} className="py-8 text-center text-gray-400 text-xs">
+                        لا توجد طلبات تقديم مسجلة بالخادم حالياً.
+                      </td>
+                    </tr>
+                  ) : (
+                    applicants.map(app => (
+                      <tr key={app.id} className="text-gray-750 dark:text-gray-300 hover:bg-gray-50/50 dark:hover:bg-gray-800/10 transition-colors">
+                        <td className="py-3 font-bold text-xs">
+                          {app.name}
+                          {app.email && (
+                            <span className="block text-[10px] text-gray-400 font-normal mt-0.5">{app.email}</span>
+                          )}
+                        </td>
+                        <td className="py-3 font-medium text-xs">
+                          <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold ${
+                            app.packageName.includes('الأخوة') 
+                              ? 'bg-rose-100 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300' 
+                              : app.packageName.includes('الأخوات')
+                              ? 'bg-pink-100 dark:bg-pink-950/40 text-pink-700 dark:text-pink-300'
+                              : 'bg-emerald-100 dark:bg-emerald-950/40 text-primary dark:text-emerald-300'
+                          }`}>
+                            {app.packageName}
+                          </span>
+                        </td>
+                        <td className="py-3 font-mono text-xs text-gray-500 dark:text-gray-400">{app.nationalId}</td>
+                        <td className="py-3 text-xs text-gray-650 dark:text-gray-400">{app.country}</td>
+                        <td className="py-3 text-xs">
+                          <a 
+                            href={`https://wa.me/${app.whatsapp.replace(/[^0-9]/g, '')}`} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 text-primary dark:text-emerald-400 font-semibold hover:underline"
+                            dir="ltr"
+                          >
+                            <span>💬</span>
+                            <span>{app.whatsapp}</span>
+                          </a>
+                        </td>
+                        <td className="py-3 max-w-[240px] whitespace-pre-line leading-relaxed text-xs">
+                          {app.siblings && (
+                            <div className="text-rose-600 dark:text-rose-400">
+                              <strong>الأشقاء: </strong>{app.siblings}
+                            </div>
+                          )}
+                          {app.isMemorized ? (
+                            <div className="text-emerald-700 dark:text-emerald-450 mt-1">
+                              <strong>الحفظ: </strong>{app.memorizedSurahs} ({app.memorizeStart === 'FROM_BAQARAH' ? 'من البقرة' : 'من الناس'})
+                            </div>
+                          ) : (
+                            <span className="text-gray-400 dark:text-gray-500">لا يوجد حفظ مسبق</span>
+                          )}
+                        </td>
+                        <td className="py-3 text-center">
+                          <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold ${
+                            app.status === 'APPROVED' 
+                              ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-400' 
+                              : app.status === 'REJECTED' 
+                              ? 'bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-400' 
+                              : 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-400'
+                          }`}>
+                            {app.status === 'APPROVED' ? 'مقبول' : app.status === 'REJECTED' ? 'مرفوض' : 'قيد المراجعة'}
+                          </span>
+                        </td>
+                        <td className="py-3 text-center">
+                          <div className="flex items-center justify-center gap-1.5">
+                            {app.status === 'PENDING' && (
+                              <>
+                                <button
+                                  onClick={async () => {
+                                    try {
+                                      await updateApplicantStatus(app.id, 'APPROVED');
+                                      alert('تم قبول طلب التسجيل بنجاح! يمكنك الآن تسجيل الدارس كعضو جديد.');
+                                    } catch (err: any) {
+                                      alert(err.message);
+                                    }
+                                  }}
+                                  className="px-2 py-1 rounded bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-[10px]"
+                                >
+                                  قبول ✓
+                                </button>
+                                <button
+                                  onClick={async () => {
+                                    try {
+                                      await updateApplicantStatus(app.id, 'REJECTED');
+                                    } catch (err: any) {
+                                      alert(err.message);
+                                    }
+                                  }}
+                                  className="px-2 py-1 rounded bg-red-500 hover:bg-red-600 text-white font-bold text-[10px]"
+                                >
+                                  رفض ✕
+                                </button>
+                              </>
+                            )}
+                            <button
+                              onClick={async () => {
+                                if (window.confirm('هل أنت متأكد من رغبتك في حذف هذا الطلب نهائياً؟')) {
+                                  try {
+                                    await deleteApplicant(app.id);
+                                  } catch (err: any) {
+                                    alert(err.message);
+                                  }
+                                }
+                              }}
+                              className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-400 hover:text-red-500 text-xs"
+                              title="حذف الطلب"
+                            >
+                              🗑️
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
                 </tbody>
               </table>
             </div>

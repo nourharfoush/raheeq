@@ -4,8 +4,10 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import {
   apiLogin, apiRegister, apiVerifyOtp, apiResetPassword, apiConfirmReset,
   apiGetMe, apiUpdateProfile, clearToken, getToken, setToken,
-  apiGetUsers, apiCreateUser, apiUpdateUser, apiDeleteUser
+  apiGetUsers, apiCreateUser, apiUpdateUser, apiDeleteUser,
+  apiSubmitApplication, apiGetApplicants, apiUpdateApplicantStatus, apiDeleteApplicant, ApiApplicant
 } from '@/lib/api';
+
 
 // Types mimicking backend schema
 export type Role = 'ADMIN' | 'TEACHER' | 'STUDENT' | 'PARENT' | 'SUPERVISOR';
@@ -156,6 +158,7 @@ interface AppContextType {
   evaluations: Evaluation[];
   subscriptions: Subscription[];
   notifications: Notification[];
+  applicants: ApiApplicant[];
   
   // Actions
   login: (username: string, password: string) => Promise<User>;
@@ -171,6 +174,12 @@ interface AppContextType {
   addUser: (userData: { username: string; password?: string; name: string; phone?: string; role: Role; isActive?: boolean }) => Promise<void>;
   updateUser: (id: string, userData: { username?: string; password?: string; name?: string; phone?: string; role?: Role; isActive?: boolean }) => Promise<void>;
   deleteUser: (id: string) => Promise<void>;
+
+  // Applicants management
+  refreshApplicants: () => Promise<void>;
+  submitApplication: (data: { name: string; nationalId: string; country: string; email?: string; packageName: string; whatsapp: string; siblings?: string; isMemorized: boolean; memorizedSurahs?: string; memorizeStart?: string }) => Promise<ApiApplicant>;
+  updateApplicantStatus: (id: string, status: 'PENDING' | 'APPROVED' | 'REJECTED') => Promise<void>;
+  deleteApplicant: (id: string) => Promise<void>;
   
   // Platform management
   createHalaqa: (halaqa: Omit<Halaqa, 'id' | 'studentsCount'>) => void;
@@ -208,6 +217,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [evaluations, setEvaluations] = useState<Evaluation[]>([]);
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
   const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [applicants, setApplicants] = useState<ApiApplicant[]>([]);
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
   
   const [otpStore, setOtpStore] = useState<Record<string, { otp: string; data: any }>>({});
@@ -249,6 +259,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setEvaluations(JSON.parse(localStorage.getItem('t_evaluations') || '[]'));
       setSubscriptions(JSON.parse(localStorage.getItem('t_subscriptions') || '[]'));
       setNotifications(JSON.parse(localStorage.getItem('t_notifications') || '[]'));
+      setApplicants(JSON.parse(localStorage.getItem('t_applicants') || '[]'));
     } else {
       // ── مستخدم المدير فقط عند التهيئة الأولى ──
       // لا توجد بيانات وهمية — المنصة تبدأ نظيفة تماماً
@@ -265,8 +276,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const defaultProgress: ProgressLog[] = [];
       const defaultEvaluations: Evaluation[] = [];
       const defaultSubscriptions: Subscription[] = [];
-
       const defaultNotifications: Notification[] = [];
+      const defaultApplicants: ApiApplicant[] = [];
 
       setUsers(defaultUsers);
       setStudentProfiles(defaultStudents);
@@ -278,6 +289,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setEvaluations(defaultEvaluations);
       setSubscriptions(defaultSubscriptions);
       setNotifications(defaultNotifications);
+      setApplicants(defaultApplicants);
 
       localStorage.setItem('t_users', JSON.stringify(defaultUsers));
       localStorage.setItem('t_student_profiles', JSON.stringify(defaultStudents));
@@ -289,6 +301,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       localStorage.setItem('t_evaluations', JSON.stringify(defaultEvaluations));
       localStorage.setItem('t_subscriptions', JSON.stringify(defaultSubscriptions));
       localStorage.setItem('t_notifications', JSON.stringify(defaultNotifications));
+      localStorage.setItem('t_applicants', JSON.stringify(defaultApplicants));
     }
     setLoading(false);
   }, []);
@@ -297,6 +310,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (currentUser?.role === 'ADMIN') {
       refreshUsers();
+      refreshApplicants();
     }
   }, [currentUser]);
 
@@ -436,6 +450,45 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setUsers(prev => prev.filter(u => u.id !== id));
     } catch (error: any) {
       throw new Error(error.message || 'حدث خطأ أثناء حذف المستخدم');
+    }
+  };
+
+  // Applicants management
+  const refreshApplicants = async () => {
+    try {
+      const data = await apiGetApplicants();
+      setApplicants(data);
+      saveState('t_applicants', data);
+    } catch (error) {
+      console.error('Failed to fetch applicants:', error);
+    }
+  };
+
+  const submitApplication = async (data: { name: string; nationalId: string; country: string; email?: string; packageName: string; whatsapp: string; siblings?: string; isMemorized: boolean; memorizedSurahs?: string; memorizeStart?: string }) => {
+    try {
+      const newApp = await apiSubmitApplication(data);
+      setApplicants(prev => [newApp, ...prev]);
+      return newApp;
+    } catch (error: any) {
+      throw new Error(error.message || 'حدث خطأ أثناء تقديم طلب التسجيل');
+    }
+  };
+
+  const updateApplicantStatus = async (id: string, status: 'PENDING' | 'APPROVED' | 'REJECTED') => {
+    try {
+      const updated = await apiUpdateApplicantStatus(id, status);
+      setApplicants(prev => prev.map(a => a.id === id ? updated : a));
+    } catch (error: any) {
+      throw new Error(error.message || 'حدث خطأ أثناء تحديث حالة الطلب');
+    }
+  };
+
+  const deleteApplicant = async (id: string) => {
+    try {
+      await apiDeleteApplicant(id);
+      setApplicants(prev => prev.filter(a => a.id !== id));
+    } catch (error: any) {
+      throw new Error(error.message || 'حدث خطأ أثناء حذف طلب المتقدم');
     }
   };
 
@@ -701,6 +754,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         evaluations,
         subscriptions,
         notifications,
+        applicants,
         
         login,
         register,
@@ -714,6 +768,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         addUser,
         updateUser,
         deleteUser,
+        
+        refreshApplicants,
+        submitApplication,
+        updateApplicantStatus,
+        deleteApplicant,
         
         createHalaqa,
         enrollInHalaqa,

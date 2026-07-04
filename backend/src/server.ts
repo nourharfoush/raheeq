@@ -1,3 +1,6 @@
+import dns from 'dns';
+dns.setDefaultResultOrder('ipv4first');
+
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
@@ -14,6 +17,7 @@ import halaqatRoutes from './modules/halaqat/halaqat.controller';
 import progressRoutes from './modules/progress/progress.controller';
 import paymentRoutes from './modules/payments/payments.controller';
 import notificationRoutes from './modules/notifications/notifications.controller';
+import applicantRoutes from './modules/applicants/applicants.controller';
 
 const app = express();
 const PORT = Number(process.env.PORT) || 5000;
@@ -52,6 +56,7 @@ app.use('/api/halaqat', halaqatRoutes);
 app.use('/api/progress', progressRoutes);
 app.use('/api/subscriptions', paymentRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/applicants', applicantRoutes);
 
 // Global Error Handler
 app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {

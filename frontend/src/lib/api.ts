@@ -186,3 +186,61 @@ export async function apiDeleteUser(id: string): Promise<{ message: string }> {
     method: 'DELETE',
   });
 }
+
+// ── Applicants endpoints ──────────────────────────────────────────────────────
+
+export interface ApiApplicant {
+  id: string;
+  name: string;
+  nationalId: string;
+  country: string;
+  email?: string;
+  packageName: string;
+  whatsapp: string;
+  siblings?: string;
+  isMemorized: boolean;
+  memorizedSurahs?: string;
+  memorizeStart?: string;
+  status: 'PENDING' | 'APPROVED' | 'REJECTED';
+  createdAt: string;
+  updatedAt: string;
+}
+
+export async function apiSubmitApplication(data: {
+  name: string;
+  nationalId: string;
+  country: string;
+  email?: string;
+  packageName: string;
+  whatsapp: string;
+  siblings?: string;
+  isMemorized: boolean;
+  memorizedSurahs?: string;
+  memorizeStart?: string;
+}): Promise<ApiApplicant> {
+  return apiFetch<ApiApplicant>('/applicants', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function apiGetApplicants(): Promise<ApiApplicant[]> {
+  return apiFetch<ApiApplicant[]>('/applicants');
+}
+
+export async function apiUpdateApplicantStatus(
+  id: string,
+  status: 'PENDING' | 'APPROVED' | 'REJECTED'
+): Promise<ApiApplicant> {
+  return apiFetch<ApiApplicant>(`/applicants/${id}/status`, {
+    method: 'PUT',
+    body: JSON.stringify({ status }),
+  });
+}
+
+export async function apiDeleteApplicant(id: string): Promise<{ message: string }> {
+  return apiFetch<{ message: string }>(`/applicants/${id}`, {
+    method: 'DELETE',
+  });
+}
+
