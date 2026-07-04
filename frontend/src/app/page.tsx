@@ -239,7 +239,7 @@ export default function MarketingPage() {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto mt-16">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto mt-16">
             {/* Once Weekly Plan */}
             <div className="p-8 rounded-3xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 relative space-y-6 shadow-xl">
               <h3 className="text-2xl font-bold text-gray-900 dark:text-white">باقة حصة أسبوعياً</h3>
@@ -284,6 +284,31 @@ export default function MarketingPage() {
               >
                 اشترك الآن
               </Link>
+            </div>
+
+            {/* Vacation Plan */}
+            <div className="p-8 rounded-3xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 relative space-y-6 shadow-xl flex flex-col justify-between">
+              <div>
+                <span className="inline-block px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-950 text-primary dark:text-emerald-400 text-xs font-bold mb-3">موسمي 🏖️</span>
+                <h3 className="text-2xl font-bold text-gray-900 dark:text-white">باقة خطة الإجازات</h3>
+                <p className="text-sm text-gray-500 mt-2">خطة مكثفة مخصصة ومصممة لاستغلال الإجازات الصيفية والسنوية لحفظ وضبط كتاب الله</p>
+                <div className="mt-6 p-4 rounded-2xl bg-cream/50 dark:bg-gray-800/50 border border-gold/20 text-center">
+                  <span className="block text-gold font-bold text-lg">النظام والأسعار قريباً</span>
+                  <span className="text-xs text-gray-500 dark:text-gray-400 mt-1 block">ترقبوا إطلاق البرنامج الصيفي المكثف</span>
+                </div>
+                <ul className="space-y-3 text-sm text-gray-600 dark:text-gray-300 mt-6">
+                  <li className="flex items-center gap-2">🟢 برنامج حفظ مكثف يومي / شبه يومي</li>
+                  <li className="flex items-center gap-2">🟢 مسابقات وحوافز وجوائز للمتميزين</li>
+                  <li className="flex items-center gap-2">🟢 فصول ومجموعات تفاعلية خاصة</li>
+                  <li className="flex items-center gap-2">🟢 شهادات تفوق وتخرج معتمدة بنهاية الإجازة</li>
+                </ul>
+              </div>
+              <button 
+                disabled
+                className="mt-6 block text-center w-full py-3 rounded-2xl bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 font-semibold cursor-not-allowed border border-gray-200 dark:border-gray-700 text-sm"
+              >
+                انتظرونا قريباً
+              </button>
             </div>
           </div>
         </div>
