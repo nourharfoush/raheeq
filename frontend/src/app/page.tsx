@@ -68,6 +68,40 @@ export default function MarketingPage() {
         </div>
       </header>
 
+      {/* Top Banner: Female Teacher Announcement */}
+      <div className="bg-gradient-to-r from-emerald-50 via-rose-50/30 to-emerald-50 dark:from-emerald-950/20 dark:via-rose-950/10 dark:to-emerald-950/20 border-b border-gray-200 dark:border-gray-800 transition-colors py-4">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="flex flex-col md:flex-row items-center gap-5 text-center md:text-right">
+            <div className="relative shrink-0">
+              <img 
+                src="/female-teacher.png" 
+                alt="معلمة قرآن" 
+                className="w-20 h-20 rounded-2xl object-cover border-2 border-gold/40 shadow-lg"
+              />
+              <span className="absolute -top-2 -right-2 px-2 py-0.5 rounded-md bg-gold text-white text-[10px] font-bold shadow-md">
+                جديد متميز
+              </span>
+            </div>
+            <div className="space-y-1">
+              <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center justify-center md:justify-start gap-2">
+                🌸 حلقات الأخوات بمحفظات سيدات مجازات
+              </h3>
+              <p className="text-sm text-gray-600 dark:text-gray-300">
+                نوفر فصولاً خاصة ومستقلة تماماً للأخوات والفتيات والأطفال تحت إشراف نخبة من معلمات الأزهر الشريف لضمان الخصوصية والراحة.
+              </p>
+            </div>
+          </div>
+          <div className="shrink-0 w-full md:w-auto text-center">
+            <Link 
+              href="/auth?tab=register" 
+              className="block md:inline-block text-center px-6 py-3 rounded-xl bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-700 hover:to-pink-700 text-white font-bold text-sm shadow-md shadow-rose-200 dark:shadow-none hover:scale-[1.02] active:scale-[0.98] transition-all"
+            >
+              احجز حلقة نسائية الآن
+            </Link>
+          </div>
+        </div>
+      </div>
+
       {/* Hero Section */}
       <section className="relative py-20 lg:py-32 overflow-hidden bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-emerald-50/50 via-cream to-cream dark:from-emerald-950/20 dark:via-dark-bg dark:to-dark-bg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 grid lg:grid-cols-2 gap-16 items-center">
