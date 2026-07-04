@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useApp, Role } from '@/context/AppContext';
 import { Icons } from '@/components/Icons';
 
@@ -175,26 +175,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </div>
 
           {/* Navigation Links */}
-          <nav className="p-3 space-y-1">
-            {navItems.map((item) => {
-              const isActive = pathname === item.href;
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold transition-all ${
-                    isActive
-                      ? 'bg-gradient-to-r from-gold to-amber-500 text-emerald-950 shadow-md scale-[1.02]'
-                      : 'text-emerald-100 hover:bg-white/5 hover:text-white'
-                  } ${isCollapsed ? 'justify-center' : ''}`}
-                  title={item.name}
-                >
-                  <span className="text-lg shrink-0">{item.icon}</span>
-                  {!isCollapsed && <span className="truncate">{item.name}</span>}
-                </Link>
-              );
-            })}
-          </nav>
+          <React.Suspense fallback={<div className="p-3 animate-pulse space-y-2"><div className="h-10 bg-white/5 rounded-xl" /><div className="h-10 bg-white/5 rounded-xl" /></div>}>
+            <SidebarNavigation 
+              navItems={navItems}
+              pathname={pathname}
+              isCollapsed={isCollapsed}
+            />
+          </React.Suspense>
         </div>
 
         {/* Footer actions inside Sidebar */}
@@ -290,5 +277,50 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       </main>
 
     </div>
+  );
+}
+
+function SidebarNavigation({ 
+  navItems, 
+  pathname, 
+  isCollapsed 
+}: { 
+  navItems: SidebarItem[]; 
+  pathname: string; 
+  isCollapsed: boolean; 
+}) {
+  const searchParams = useSearchParams();
+  const currentTab = searchParams.get('tab');
+
+  return (
+    <nav className="p-3 space-y-1">
+      {navItems.map((item) => {
+        const isActive = (() => {
+          const [itemPath, itemQuery] = item.href.split('?');
+          if (pathname !== itemPath) return false;
+          if (!itemQuery) {
+            return !currentTab;
+          }
+          const params = new URLSearchParams(itemQuery);
+          const itemTab = params.get('tab');
+          return currentTab === itemTab;
+        })();
+        return (
+          <Link
+            key={item.href}
+            href={item.href}
+            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold transition-all ${
+              isActive
+                ? 'bg-gradient-to-r from-gold to-amber-500 text-emerald-950 shadow-md scale-[1.02]'
+                : 'text-emerald-100 hover:bg-white/5 hover:text-white'
+            } ${isCollapsed ? 'justify-center' : ''}`}
+            title={item.name}
+          >
+            <span className="text-lg shrink-0">{item.icon}</span>
+            {!isCollapsed && <span className="truncate">{item.name}</span>}
+          </Link>
+        );
+      })}
+    </nav>
   );
 }
