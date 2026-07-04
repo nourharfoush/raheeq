@@ -72,14 +72,19 @@ export default function MarketingPage() {
       <section className="relative py-20 lg:py-32 overflow-hidden bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-emerald-50/50 via-cream to-cream dark:from-emerald-950/20 dark:via-dark-bg dark:to-dark-bg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 grid lg:grid-cols-2 gap-16 items-center">
           <div className="space-y-8 text-center lg:text-right">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-100/80 dark:bg-emerald-900/40 text-primary dark:text-emerald-300 text-sm font-semibold border border-emerald-200/50 dark:border-emerald-800/30">
-              ✨ المنهج الأزهري الأصيل والمدرسة المصرية في التلاوة والقراءات
+            <div className="flex flex-wrap justify-center lg:justify-start gap-3">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-100/80 dark:bg-emerald-900/40 text-primary dark:text-emerald-300 text-xs sm:text-sm font-semibold border border-emerald-200/50 dark:border-emerald-800/30">
+                ✨ المنهج الأزهري الأصيل والمدرسة المصرية في التلاوة والقراءات
+              </div>
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-rose-50/80 dark:bg-rose-950/30 text-rose-700 dark:text-rose-300 text-xs sm:text-sm font-semibold border border-rose-200/50 dark:border-rose-900/30">
+                🌸 متوفر معلمات ومحفظات سيدات للأخوات والفتيات والأطفال
+              </div>
             </div>
             <h2 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-gray-900 dark:text-white leading-[1.2]">
               يرتّق حفظك، <span className="bg-gradient-to-l from-primary to-primary-light dark:from-emerald-400 dark:to-emerald-200 bg-clip-text text-transparent">وينير دربك</span> بطابع مصري عريق
             </h2>
             <p className="text-lg text-gray-600 dark:text-gray-300 max-w-xl mx-auto lg:mx-0 leading-relaxed">
-              منصة إلكترونية رائدة تتيح للطلاب وأولياء أمورهم تنظيم ومتابعة خطط الحفظ والمراجعة مع معلمين مجازين من الأزهر الشريف والمدرسة المصرية للتلاوة عبر فصول تفاعلية مباشرة.
+              منصة إلكترونية رائدة تتيح للطلاب وأولياء أمورهم تنظيم ومتابعة خطط الحفظ والمراجعة مع معلمين ومعلمات مجازين من الأزهر الشريف والمدرسة المصرية للتلاوة عبر فصول تفاعلية مباشرة، مع توفير محفظات سيدات للأخوات والفتيات والأطفال لخصوصية تامة.
             </p>
             <div className="flex flex-wrap justify-center lg:justify-start gap-4">
               <Link 
@@ -132,6 +137,31 @@ export default function MarketingPage() {
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Female Teachers Announcement Banner */}
+      <section className="py-8 bg-gradient-to-r from-rose-50/40 via-cream to-rose-50/40 dark:from-rose-950/10 dark:via-dark-bg dark:to-rose-950/10 border-y border-rose-100 dark:border-rose-950/30 transition-colors">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="flex flex-col md:flex-row items-center gap-4 text-center md:text-right">
+            <div className="w-12 h-12 rounded-2xl bg-rose-100 dark:bg-rose-950 flex items-center justify-center text-rose-600 dark:text-rose-300 text-2xl shrink-0 shadow-sm">
+              🌸
+            </div>
+            <div>
+              <h4 className="font-bold text-lg text-gray-900 dark:text-white">فصول خاصة للأخوات والفتيات والأطفال</h4>
+              <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
+                نوفر نخبة من المحفظات والمعلمات المجازات من الأزهر الشريف لتعليم القراءة والتلاوة والتجويد للأخوات بخصوصية تامة وراحة كاملة.
+              </p>
+            </div>
+          </div>
+          <div className="shrink-0">
+            <Link 
+              href="/auth?tab=register" 
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-sm shadow-md shadow-rose-200 dark:shadow-none hover:scale-[1.02] active:scale-[0.98] transition-all"
+            >
+              طلب معلمة قرآن
+            </Link>
           </div>
         </div>
       </section>
