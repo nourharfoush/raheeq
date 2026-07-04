@@ -219,7 +219,7 @@ export default function MarketingPage() {
               <div className="w-14 h-14 rounded-2xl bg-rose-500/10 text-rose-600 dark:text-rose-400 flex items-center justify-center text-3xl">🌸</div>
               <h3 className="text-xl font-bold text-gray-900 dark:text-white">محفظات سيدات للأخوات</h3>
               <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
-                نوفر نخبة من المعلمات والمحفظات المجازات من الأزهر الشريف لتعليم الأخوات والفتيات والأطفال بخصوصية تامة وراحة كاملة.
+                نوفر نخبة من المعلمات والمحفظات المجازات من الأزهر الشريف لتعليم السيدات والفتيات والأطفال بخصوصية تامة وراحة كاملة.
               </p>
             </div>
           </div>
