@@ -286,21 +286,21 @@ export default function MarketingPage() {
               </Link>
             </div>
 
-            {/* Vacation Plan */}
+            {/* Quranic Ijazah Plan */}
             <div className="p-8 rounded-3xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 relative space-y-6 shadow-xl flex flex-col justify-between">
               <div>
-                <span className="inline-block px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-950 text-primary dark:text-emerald-400 text-xs font-bold mb-3">موسمي 🏖️</span>
-                <h3 className="text-2xl font-bold text-gray-900 dark:text-white">باقة خطة الإجازات</h3>
-                <p className="text-sm text-gray-500 mt-2">خطة مكثفة مخصصة ومصممة لاستغلال الإجازات الصيفية والسنوية لحفظ وضبط كتاب الله</p>
+                <span className="inline-block px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-950 text-primary dark:text-emerald-400 text-xs font-bold mb-3">سند متصل 📜</span>
+                <h3 className="text-2xl font-bold text-gray-900 dark:text-white">باقة إجازات القرآن الكريم</h3>
+                <p className="text-sm text-gray-500 mt-2">برنامج متكامل للحصول على الإجازة والسند المتصل برواية أو أكثر من القراءات المتواترة على يد مقرئين مجازين.</p>
                 <div className="mt-6 p-4 rounded-2xl bg-cream/50 dark:bg-gray-800/50 border border-gold/20 text-center">
                   <span className="block text-gold font-bold text-lg">النظام والأسعار قريباً</span>
-                  <span className="text-xs text-gray-500 dark:text-gray-400 mt-1 block">ترقبوا إطلاق البرنامج الصيفي المكثف</span>
+                  <span className="text-xs text-gray-500 dark:text-gray-400 mt-1 block">ترقبوا إطلاق برنامج السند والإجازة الفردية</span>
                 </div>
                 <ul className="space-y-3 text-sm text-gray-600 dark:text-gray-300 mt-6">
-                  <li className="flex items-center gap-2">🟢 برنامج حفظ مكثف يومي / شبه يومي</li>
-                  <li className="flex items-center gap-2">🟢 مسابقات وحوافز وجوائز للمتميزين</li>
-                  <li className="flex items-center gap-2">🟢 فصول ومجموعات تفاعلية خاصة</li>
-                  <li className="flex items-center gap-2">🟢 شهادات تفوق وتخرج معتمدة بنهاية الإجازة</li>
+                  <li className="flex items-center gap-2">🟢 جلسات إقراء فردية (خاصة) مع الشيخ المقرئ</li>
+                  <li className="flex items-center gap-2">🟢 ضبط مخارج الحروف وصفاتها والأحكام الدقيقة</li>
+                  <li className="flex items-center gap-2">🟢 دراسة وشرح متون التجويد والقراءات</li>
+                  <li className="flex items-center gap-2">🟢 منح سند متصل للنبي ﷺ عند الختم والإجازة</li>
                 </ul>
               </div>
               <button 
