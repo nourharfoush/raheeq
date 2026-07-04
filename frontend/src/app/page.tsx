@@ -141,30 +141,6 @@ export default function MarketingPage() {
         </div>
       </section>
 
-      {/* Female Teachers Announcement Banner */}
-      <section className="py-8 bg-gradient-to-r from-rose-50/40 via-cream to-rose-50/40 dark:from-rose-950/10 dark:via-dark-bg dark:to-rose-950/10 border-y border-rose-100 dark:border-rose-950/30 transition-colors">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="flex flex-col md:flex-row items-center gap-4 text-center md:text-right">
-            <div className="w-12 h-12 rounded-2xl bg-rose-100 dark:bg-rose-950 flex items-center justify-center text-rose-600 dark:text-rose-300 text-2xl shrink-0 shadow-sm">
-              🌸
-            </div>
-            <div>
-              <h4 className="font-bold text-lg text-gray-900 dark:text-white">فصول خاصة للأخوات والفتيات والأطفال</h4>
-              <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
-                نوفر نخبة من المحفظات والمعلمات المجازات من الأزهر الشريف لتعليم القراءة والتلاوة والتجويد للأخوات بخصوصية تامة وراحة كاملة.
-              </p>
-            </div>
-          </div>
-          <div className="shrink-0">
-            <Link 
-              href="/auth?tab=register" 
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-sm shadow-md shadow-rose-200 dark:shadow-none hover:scale-[1.02] active:scale-[0.98] transition-all"
-            >
-              طلب معلمة قرآن
-            </Link>
-          </div>
-        </div>
-      </section>
 
       {/* Features Section */}
       <section id="features" className="py-24 bg-white dark:bg-gray-900 transition-colors">
@@ -179,7 +155,7 @@ export default function MarketingPage() {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8 mt-16">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mt-16">
             {/* Feature 1 */}
             <div className="p-8 rounded-3xl border border-gray-100 dark:border-gray-800 bg-cream/30 dark:bg-gray-800/30 space-y-6 hover:shadow-xl hover:scale-[1.01] transition-all">
               <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 text-primary dark:text-emerald-400 flex items-center justify-center text-3xl">💻</div>
@@ -202,6 +178,14 @@ export default function MarketingPage() {
               <h3 className="text-xl font-bold text-gray-900 dark:text-white">لوحة أولياء الأمور</h3>
               <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
                 لوحة تحكم خاصة لولي الأمر لمتابعة تقدم أبنائه، ومراجعة تقارير حضورهم ودرجات التسميع وتلقي إشعارات تفوقهم الفورية.
+              </p>
+            </div>
+            {/* Feature 4 */}
+            <div className="p-8 rounded-3xl border border-gray-100 dark:border-gray-800 bg-cream/30 dark:bg-gray-800/30 space-y-6 hover:shadow-xl hover:scale-[1.01] transition-all">
+              <div className="w-14 h-14 rounded-2xl bg-rose-500/10 text-rose-600 dark:text-rose-400 flex items-center justify-center text-3xl">🌸</div>
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white">محفظات سيدات للأخوات</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
+                نوفر نخبة من المعلمات والمحفظات المجازات من الأزهر الشريف لتعليم الأخوات والفتيات والأطفال بخصوصية تامة وراحة كاملة.
               </p>
             </div>
           </div>
