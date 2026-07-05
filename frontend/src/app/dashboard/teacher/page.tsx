@@ -316,7 +316,7 @@ export default function TeacherDashboard() {
 
                         <div className="flex flex-wrap gap-4 text-xs font-medium text-gray-600 dark:text-gray-300">
                           <span>👥 السعة: {halaqa.studentsCount} / {halaqa.capacity} طالب</span>
-                          <span>📅 الجدولة: {halaqa.schedule.map(s => `${s.day} (${s.time})`).join('، ')}</span>
+                          <span>📅 الجدولة: {halaqa.schedule?.map(s => `${s.day} (${s.time})`).join('، ') || 'غير مجدولة'}</span>
                         </div>
                       </div>
                     ))}

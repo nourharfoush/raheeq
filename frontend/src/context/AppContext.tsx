@@ -41,10 +41,18 @@ export interface Halaqa {
   description: string;
   type: 'INDIVIDUAL' | 'GROUP';
   capacity: number;
-  schedule: Array<{ day: string; time: string }>;
+  schedule?: Array<{ day: string; time: string }>;
   teacherId: string;
   studentsCount: number;
   supervisorId?: string;
+  startDate?: string;
+  startTime?: string;
+  endTime?: string;
+  days?: string[];
+  linkType?: 'INTERNAL' | 'EXTERNAL';
+  externalLink?: string;
+  initialSurah?: string;
+  initialAyah?: string;
 }
 
 export interface Session {
@@ -184,6 +192,7 @@ interface AppContextType {
   
   // Platform management
   createHalaqa: (halaqa: Omit<Halaqa, 'id' | 'studentsCount'>) => void;
+  updateHalaqatList: (updated: Halaqa[]) => void;
   enrollInHalaqa: (halaqaId: string, studentId: string) => Promise<void>;
   createSession: (halaqaId: string, title: string, description: string, start: string, end: string) => void;
   submitAttendance: (sessionId: string, records: Array<{ studentId: string; status: 'PRESENT' | 'ABSENT' | 'LATE'; notes?: string }>) => void;
@@ -252,7 +261,65 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setCurrentUser(localStorage.getItem('t_current_user') ? JSON.parse(localStorage.getItem('t_current_user')!) : null);
       setStudentProfiles(JSON.parse(localStorage.getItem('t_student_profiles') || '[]'));
       setTeacherProfiles(JSON.parse(localStorage.getItem('t_teacher_profiles') || '[]'));
-      setHalaqat(JSON.parse(localStorage.getItem('t_halaqat') || '[]'));
+      
+      const savedHalaqat = localStorage.getItem('tahfez_halaqat_crud') || localStorage.getItem('t_halaqat');
+      let loadedHalaqat = JSON.parse(savedHalaqat || '[]');
+      if (loadedHalaqat.length === 0) {
+        const todayName = (() => {
+          const daysMap = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+          return daysMap[new Date().getDay()];
+        })();
+        const now = new Date();
+        const currentHour = now.getHours();
+        const formatHour = (h: number) => String(h > 12 ? h - 12 : h === 0 ? 12 : h).padStart(2, '0');
+        const getPeriod = (h: number) => (h >= 12 ? 'م' : 'ص');
+        const demoStart = `${formatHour(currentHour - 1)}:00 ${getPeriod(currentHour - 1)}`;
+        const demoEnd = `${formatHour(currentHour + 2)}:00 ${getPeriod(currentHour + 2)}`;
+
+        loadedHalaqat = [
+          {
+            id: '101',
+            name: 'حلقة التلاوة المصرية الأزهري',
+            description: 'منهج ورش وحفص',
+            type: 'GROUP',
+            capacity: 15,
+            schedule: [{ day: todayName, time: '16:00' }, { day: 'الإثنين', time: '16:00' }],
+            teacherId: 't-1',
+            studentsCount: 1,
+            supervisorId: 'sup-1',
+            startDate: '2026-01-01',
+            startTime: demoStart,
+            endTime: demoEnd,
+            days: [todayName, 'الإثنين', 'الأربعاء'],
+            linkType: 'INTERNAL',
+            initialSurah: 'البقرة',
+            initialAyah: '1'
+          },
+          {
+            id: '102',
+            name: 'حلقة الهمم العالية للقرآن',
+            description: 'حفظ مكثف للأطفال',
+            type: 'GROUP',
+            capacity: 10,
+            schedule: [{ day: 'السبت', time: '19:30' }, { day: 'الثلاثاء', time: '19:30' }],
+            teacherId: 't-2',
+            studentsCount: 0,
+            supervisorId: 'sup-1',
+            startDate: '2026-02-15',
+            startTime: '07:30 م',
+            endTime: '09:00 م',
+            days: ['السبت', 'الثلاثاء', 'الخميس'],
+            linkType: 'EXTERNAL',
+            externalLink: 'https://teams.microsoft.com/l/meetup-join/mock',
+            initialSurah: 'البقرة',
+            initialAyah: '1'
+          }
+        ];
+        localStorage.setItem('tahfez_halaqat_crud', JSON.stringify(loadedHalaqat));
+        localStorage.setItem('t_halaqat', JSON.stringify(loadedHalaqat));
+      }
+      setHalaqat(loadedHalaqat);
+      
       setSessions(JSON.parse(localStorage.getItem('t_sessions') || '[]'));
       setAttendance(JSON.parse(localStorage.getItem('t_attendance') || '[]'));
       setPlans(JSON.parse(localStorage.getItem('t_plans') || '[]'));
@@ -271,6 +338,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const defaultStudents: StudentProfile[] = [];
       const defaultTeachers: TeacherProfile[] = [];
       const defaultParents: StudentProfile[] = [];
+      const todayName = (() => {
+        const daysMap = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+        return daysMap[new Date().getDay()];
+      })();
+      const now = new Date();
+      const currentHour = now.getHours();
+      const formatHour = (h: number) => String(h > 12 ? h - 12 : h === 0 ? 12 : h).padStart(2, '0');
+      const getPeriod = (h: number) => (h >= 12 ? 'م' : 'ص');
+      const demoStart = `${formatHour(currentHour - 1)}:00 ${getPeriod(currentHour - 1)}`;
+      const demoEnd = `${formatHour(currentHour + 2)}:00 ${getPeriod(currentHour + 2)}`;
+
       const defaultHalaqat: Halaqa[] = [
         {
           id: '101',
@@ -278,10 +356,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           description: 'منهج ورش وحفص',
           type: 'GROUP',
           capacity: 15,
-          schedule: [{ day: 'السبت', time: '16:00' }, { day: 'الإثنين', time: '16:00' }],
-          teacherId: 't-profile',
+          schedule: [{ day: todayName, time: '16:00' }, { day: 'الإثنين', time: '16:00' }],
+          teacherId: 't-1',
           studentsCount: 1,
-          supervisorId: 'sup-1'
+          supervisorId: 'sup-1',
+          startDate: '2026-01-01',
+          startTime: demoStart,
+          endTime: demoEnd,
+          days: [todayName, 'الإثنين', 'الأربعاء'],
+          linkType: 'INTERNAL',
+          initialSurah: 'البقرة',
+          initialAyah: '1'
         },
         {
           id: '102',
@@ -292,7 +377,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           schedule: [{ day: 'السبت', time: '19:30' }, { day: 'الثلاثاء', time: '19:30' }],
           teacherId: 't-2',
           studentsCount: 0,
-          supervisorId: 'sup-1'
+          supervisorId: 'sup-1',
+          startDate: '2026-02-15',
+          startTime: '07:30 م',
+          endTime: '09:00 م',
+          days: ['السبت', 'الثلاثاء', 'الخميس'],
+          linkType: 'EXTERNAL',
+          externalLink: 'https://teams.microsoft.com/l/meetup-join/mock',
+          initialSurah: 'البقرة',
+          initialAyah: '1'
         }
       ];
       const defaultSessions: Session[] = [];
@@ -319,6 +412,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       localStorage.setItem('t_student_profiles', JSON.stringify(defaultStudents));
       localStorage.setItem('t_teacher_profiles', JSON.stringify(defaultTeachers));
       localStorage.setItem('t_halaqat', JSON.stringify(defaultHalaqat));
+      localStorage.setItem('tahfez_halaqat_crud', JSON.stringify(defaultHalaqat));
       localStorage.setItem('t_sessions', JSON.stringify(defaultSessions));
       localStorage.setItem('t_plans', JSON.stringify(defaultPlans));
       localStorage.setItem('t_progress', JSON.stringify(defaultProgress));
@@ -341,6 +435,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   // Save changes helper
   const saveState = (key: string, data: any) => {
     localStorage.setItem(key, JSON.stringify(data));
+    if (key === 't_halaqat') {
+      localStorage.setItem('tahfez_halaqat_crud', JSON.stringify(data));
+    }
   };
 
   // Auth Operations — now backed by the real Express API + PostgreSQL
@@ -524,6 +621,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       studentsCount: 0
     };
     const updated = [...halaqat, halaqa];
+    setHalaqat(updated);
+    saveState('t_halaqat', updated);
+  };
+
+  const updateHalaqatList = (updated: Halaqa[]) => {
     setHalaqat(updated);
     saveState('t_halaqat', updated);
   };
@@ -801,6 +903,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         deleteApplicant,
         
         createHalaqa,
+        updateHalaqatList,
         enrollInHalaqa,
         createSession,
         submitAttendance,

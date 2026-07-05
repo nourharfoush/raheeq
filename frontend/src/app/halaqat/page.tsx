@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useApp } from '@/context/AppContext';
+import { useApp, Halaqa } from '@/context/AppContext';
 import { Icons } from '@/components/Icons';
 import DashboardLayout from '@/components/DashboardLayout';
 
@@ -26,27 +26,10 @@ interface ProgressLog {
   circleId?: string; // Linked circle
 }
 
-interface Halaqa {
-  id: string;
-  name: string;
-  teacherId: string;
-  supervisorId?: string;
-  startDate: string;
-  startTime: string; // e.g. "04:00 م"
-  endTime: string;   // e.g. "06:00 م"
-  days: string[];    // e.g. ["السبت", "الإثنين"]
-  linkType: 'INTERNAL' | 'EXTERNAL';
-  externalLink?: string;
-  initialSurah: string;
-  initialAyah: string;
-  description?: string;
-  capacity?: number;
-}
-
 const WEEKDAYS = ['السبت', 'الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة'];
 
 export default function HalaqatPage() {
-  const { theme, toggleTheme } = useApp();
+  const { theme, toggleTheme, halaqat, updateHalaqatList } = useApp();
   const [searchQuery, setSearchQuery] = useState('');
   
   // Filters States
@@ -55,7 +38,6 @@ export default function HalaqatPage() {
   const [filterRunningNow, setFilterRunningNow] = useState(false);
   
   // CRUD States
-  const [halaqat, setHalaqat] = useState<Halaqa[]>([]);
   const [teachers, setTeachers] = useState<Teacher[]>([]);
   const [supervisors, setSupervisors] = useState<Supervisor[]>([]);
   const [progressLogs, setProgressLogs] = useState<ProgressLog[]>([]);
@@ -108,8 +90,8 @@ export default function HalaqatPage() {
     };
 
     try {
-      const startMin = parseToMinutes(halaqa.startTime);
-      const endMin = parseToMinutes(halaqa.endTime);
+      const startMin = parseToMinutes(halaqa.startTime || '');
+      const endMin = parseToMinutes(halaqa.endTime || '');
       const now = new Date();
       const nowMin = now.getHours() * 60 + now.getMinutes();
       return nowMin >= startMin && nowMin <= endMin;
@@ -159,64 +141,11 @@ export default function HalaqatPage() {
       localStorage.setItem('tahfez_progress_logs', JSON.stringify(loadedLogs));
     }
     setProgressLogs(loadedLogs);
-
-    // 3. Load Halaqat
-    const savedHalaqat = localStorage.getItem('tahfez_halaqat_crud');
-    const todayName = getArabicToday();
-    
-    const now = new Date();
-    const currentHour = now.getHours();
-    const formatHour = (h: number) => String(h > 12 ? h - 12 : h === 0 ? 12 : h).padStart(2, '0');
-    const getPeriod = (h: number) => (h >= 12 ? 'م' : 'ص');
-
-    const demoStart = `${formatHour(currentHour - 1)}:00 ${getPeriod(currentHour - 1)}`;
-    const demoEnd = `${formatHour(currentHour + 2)}:00 ${getPeriod(currentHour + 2)}`;
-
-    if (savedHalaqat) {
-      setHalaqat(JSON.parse(savedHalaqat));
-    } else {
-      const defaultSeeds: Halaqa[] = [
-        { 
-          id: '101', 
-          name: 'حلقة التلاوة المصرية الأزهري', 
-          teacherId: 't-1', 
-          supervisorId: 'sup-1',
-          startDate: '2026-01-01', 
-          startTime: demoStart, 
-          endTime: demoEnd, 
-          days: [todayName, 'الإثنين', 'الأربعاء'], 
-          linkType: 'INTERNAL', 
-          initialSurah: 'البقرة', 
-          initialAyah: '1', 
-          description: 'منهج ورش وحفص', 
-          capacity: 15 
-        },
-        { 
-          id: '102', 
-          name: 'حلقة الهمم العالية للقرآن', 
-          teacherId: 't-2', 
-          supervisorId: 'sup-1',
-          startDate: '2026-02-15', 
-          startTime: '07:30 م', 
-          endTime: '09:00 م', 
-          days: ['السبت', 'الثلاثاء', 'الخميس'], 
-          linkType: 'EXTERNAL', 
-          externalLink: 'https://teams.microsoft.com/l/meetup-join/mock', 
-          initialSurah: 'البقرة', 
-          initialAyah: '1', 
-          description: 'حفظ مكثف للأطفال', 
-          capacity: 10 
-        }
-      ];
-      setHalaqat(defaultSeeds);
-      localStorage.setItem('tahfez_halaqat_crud', JSON.stringify(defaultSeeds));
-    }
   }, []);
 
   // Save to localStorage
   const saveHalaqat = (updated: Halaqa[]) => {
-    setHalaqat(updated);
-    localStorage.setItem('tahfez_halaqat_crud', JSON.stringify(updated));
+    updateHalaqatList(updated);
   };
 
   const handleOpenAddModal = () => {
@@ -258,15 +187,15 @@ export default function HalaqatPage() {
       };
     };
 
-    const startParsed = parseTime(halaqa.startTime);
-    const endParsed = parseTime(halaqa.endTime);
+    const startParsed = parseTime(halaqa.startTime || '');
+    const endParsed = parseTime(halaqa.endTime || '');
 
     setFormData({
       id: halaqa.id,
       name: halaqa.name,
       teacherId: halaqa.teacherId,
       supervisorId: halaqa.supervisorId || '',
-      startDate: halaqa.startDate,
+      startDate: halaqa.startDate || '',
       startTimeHour: startParsed.hour,
       startTimeMinute: startParsed.minute,
       startTimePeriod: startParsed.period,
@@ -326,7 +255,10 @@ export default function HalaqatPage() {
       externalLink: formData.linkType === 'EXTERNAL' ? formData.externalLink : undefined,
       initialSurah: formData.initialSurah,
       initialAyah: formData.initialAyah,
-      capacity: 15
+      capacity: 15,
+      description: editingHalaqa?.description || '',
+      type: editingHalaqa?.type || 'GROUP',
+      studentsCount: editingHalaqa?.studentsCount || 0
     };
 
     if (editingHalaqa) {
@@ -464,7 +396,7 @@ export default function HalaqatPage() {
         ) : (
           filteredHalaqat.map(halaqa => {
             const teacherObj = teachers.find(t => t.id === halaqa.teacherId);
-            const progress = getCircleLatestProgress(halaqa.id, halaqa.initialSurah, halaqa.initialAyah);
+            const progress = getCircleLatestProgress(halaqa.id, halaqa.initialSurah || 'البقرة', halaqa.initialAyah || '1');
             const meetingUrl = getMeetingLink(halaqa);
             const isLive = isCircleRunningNow(halaqa);
 
