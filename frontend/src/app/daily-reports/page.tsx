@@ -7,7 +7,7 @@ import { SURAHS_DATA } from '@/utils/quranData';
 
 export default function DailyReportsPage() {
   const { 
-    currentUser, progressLogs, users, studentProfiles, halaqat,
+    currentUser, progressLogs, users, studentProfiles, teacherProfiles, halaqat,
     addProgressLog, confirmProgressLog, deleteProgressLog, updateProgressLog
   } = useApp();
 
@@ -19,7 +19,7 @@ export default function DailyReportsPage() {
   // Form states
   const [editingLogId, setEditingLogId] = useState<string | null>(null);
   const [selectedHalaqaId, setSelectedHalaqaId] = useState('');
-  const [selectedStudentId, setSelectedStudentId] = useState('');
+  const [reportDate, setReportDate] = useState(() => new Date().toISOString().split('T')[0]);
   const [logNotes, setLogNotes] = useState('');
   const [logSuccess, setLogSuccess] = useState(false);
 
@@ -47,30 +47,40 @@ export default function DailyReportsPage() {
   const [farRevToSurah, setFarRevToSurah] = useState('الفلق');
   const [farRevToAyah, setFarRevToAyah] = useState(5);
 
+  const role = currentUser?.role || 'ADMIN';
+
+  const teacherProfile = teacherProfiles.find(tp => tp.userId === currentUser?.id);
+  const myTeacherId = teacherProfile ? teacherProfile.id : 't-profile';
+
+  const supervisorsList = typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('tahfez_supervisors_crud') || '[]') : [];
+  const supervisorProfile = supervisorsList.find((s: any) => s.email === currentUser?.username || s.name === currentUser?.name);
+  const mySupervisorId = supervisorProfile ? supervisorProfile.id : 'sup-1';
+
+  const myHalaqatList = role === 'TEACHER' 
+    ? halaqat.filter(h => h.teacherId === myTeacherId) 
+    : role === 'SUPERVISOR'
+      ? halaqat.filter(h => h.supervisorId === mySupervisorId)
+      : halaqat;
+
+  const myHalaqatIds = myHalaqatList.map(h => h.id);
+
   // Ensure default selections
   useEffect(() => {
-    if (halaqat.length > 0) {
-      const role = currentUser?.role || 'ADMIN';
-      const myHalaqat = role === 'TEACHER' ? halaqat.filter(h => h.teacherId === 't-profile') : halaqat;
-      if (myHalaqat.length > 0 && !selectedHalaqaId) {
-        setSelectedHalaqaId(myHalaqat[0].id);
-      }
+    if (myHalaqatList.length > 0 && !selectedHalaqaId) {
+      setSelectedHalaqaId(myHalaqatList[0].id);
     }
-    if (studentProfiles.length > 0 && !selectedStudentId) {
-      setSelectedStudentId(studentProfiles[0].id);
-    }
-  }, [halaqat, studentProfiles, currentUser, selectedHalaqaId, selectedStudentId]);
+  }, [myHalaqatList, selectedHalaqaId]);
 
   const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedHalaqaId || !selectedStudentId) {
-      alert('الرجاء اختيار الحلقة والدارس');
+    if (!selectedHalaqaId) {
+      alert('الرجاء اختيار الحلقة');
       return;
     }
 
     const payload = {
-      studentId: selectedStudentId,
       halaqaId: selectedHalaqaId,
+      date: new Date(reportDate).toISOString(),
       surah: tasmeeghFromSurah, 
       startAyah: Number(tasmeeghFromAyah),
       endAyah: Number(tasmeeghToAyah),
@@ -120,7 +130,7 @@ export default function DailyReportsPage() {
   const handleStartEdit = (log: any) => {
     setEditingLogId(log.id);
     setSelectedHalaqaId(log.halaqaId || '');
-    setSelectedStudentId(log.studentId || '');
+    setReportDate(log.date ? log.date.split('T')[0] : new Date().toISOString().split('T')[0]);
     setLogNotes(log.notes || '');
 
     // Load sub-fields if present
@@ -170,13 +180,8 @@ export default function DailyReportsPage() {
     return found ? found.name : 'الحلقة العامة';
   };
 
-  const role = currentUser?.role || 'ADMIN';
-
-  const myHalaqatIds = role === 'TEACHER' ? halaqat.filter(h => h.teacherId === 't-profile').map(h => h.id) : halaqat.map(h => h.id);
-  const myHalaqatList = role === 'TEACHER' ? halaqat.filter(h => h.teacherId === 't-profile') : halaqat;
-
   const filteredLogs = progressLogs.filter(log => {
-    const matchesRole = role === 'ADMIN' || role === 'SUPERVISOR' || !log.halaqaId || myHalaqatIds.includes(log.halaqaId);
+    const matchesRole = role === 'ADMIN' || !log.halaqaId || myHalaqatIds.includes(log.halaqaId);
     const matchesHalaqaFilter = selectedHalaqaFilter === 'الكل' || log.halaqaId === selectedHalaqaFilter;
     return matchesRole && matchesHalaqaFilter;
   });
@@ -233,7 +238,7 @@ export default function DailyReportsPage() {
             </div>
             
             <form onSubmit={handleFormSubmit} className="space-y-8">
-              {/* Target Halaqa and Student selectors */}
+              {/* Target Halaqa and Date selectors */}
               <div className="grid sm:grid-cols-2 gap-6 bg-cream/30 dark:bg-gray-800/20 p-5 rounded-2xl border border-gray-200/50 dark:border-gray-700/50">
                 <div>
                   <label className="block text-xs font-bold text-gray-500 mb-2">الحلقة القرآنية المستهدفة *</label>
@@ -250,20 +255,14 @@ export default function DailyReportsPage() {
                 </div>
                 
                 <div>
-                  <label className="block text-xs font-bold text-gray-500 mb-2">الدارس *</label>
-                  <select
+                  <label className="block text-xs font-bold text-gray-500 mb-2">تاريخ التقرير *</label>
+                  <input
+                    type="date"
                     required
-                    value={selectedStudentId}
-                    onChange={(e) => setSelectedStudentId(e.target.value)}
+                    value={reportDate}
+                    onChange={(e) => setReportDate(e.target.value)}
                     className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm focus:outline-none focus:border-primary"
-                  >
-                    {studentProfiles.map(sp => {
-                      const userObj = users.find(u => u.id === sp.userId) || { name: 'يوسف أحمد الحارثي' };
-                      return (
-                        <option key={sp.id} value={sp.id}>{userObj.name}</option>
-                      );
-                    })}
-                  </select>
+                  />
                 </div>
               </div>
 
@@ -545,7 +544,7 @@ export default function DailyReportsPage() {
                 <table className="w-full text-right text-sm">
                   <thead>
                     <tr className="border-b border-gray-200 dark:border-gray-800 text-gray-400 font-bold text-xs">
-                      <th className="pb-3">الدارس والحلقة</th>
+                      <th className="pb-3">الحلقة والمعلم</th>
                       <th className="pb-3">التسميع والاختبار</th>
                       <th className="pb-3">التحفيظ اليومي</th>
                       <th className="pb-3">المراجعة القريبة</th>
@@ -563,16 +562,24 @@ export default function DailyReportsPage() {
                       </tr>
                     ) : (
                       filteredLogs.map(log => {
-                        const student = studentProfiles.find(s => s.id === log.studentId);
-                        const userObj = users.find(u => u.id === student?.userId) || { name: 'يوسف أحمد الحارثي' };
                         const isConfirmed = log.status === 'CONFIRMED';
+                        const halaqa = halaqat.find(h => h.id === log.halaqaId);
+                        
+                        let teacherName = 'غير معين';
+                        if (halaqa) {
+                          const teacherProf = teacherProfiles.find(tp => tp.id === halaqa.teacherId || tp.userId === halaqa.teacherId);
+                          const teacherUser = users.find(u => u.id === teacherProf?.userId || u.id === halaqa.teacherId || u.id === 'u-teacher');
+                          if (teacherUser) {
+                            teacherName = teacherUser.name;
+                          }
+                        }
                         
                         return (
                           <tr key={log.id} className="text-gray-700 dark:text-gray-300 text-xs hover:bg-gray-50/50 dark:hover:bg-gray-800/10 transition-colors">
-                            {/* Student Info */}
+                            {/* Halaqa Info */}
                             <td className="py-4 font-bold max-w-[150px]">
-                              <p className="text-gray-900 dark:text-white">{userObj.name}</p>
-                              <p className="text-[10px] text-gray-500 font-normal mt-0.5">{getHalaqaName(log.halaqaId)}</p>
+                              <p className="text-gray-900 dark:text-white">{getHalaqaName(log.halaqaId)}</p>
+                              <p className="text-[10px] text-gray-500 font-normal mt-0.5">المحفظ: {teacherName}</p>
                               <p className="text-[9px] text-primary dark:text-emerald-400 font-mono mt-0.5">{new Date(log.date).toLocaleDateString('ar-EG')}</p>
                             </td>
 

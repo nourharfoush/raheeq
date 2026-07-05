@@ -320,13 +320,14 @@ function AdminDashboardContent() {
                   <p className="text-xs text-gray-400 text-center py-8">لا توجد تقارير مسجلة</p>
                 ) : (
                   progressLogs.slice(0, 5).map(log => {
-                    const sp = studentProfiles.find(s => s.id === log.studentId);
-                    const u  = users.find(u => u.id === sp?.userId);
+                    const sp = log.studentId ? studentProfiles.find(s => s.id === log.studentId) : null;
+                    const u  = sp ? users.find(u => u.id === sp.userId) : null;
+                    const logTitle = u?.name || (log.halaqaId ? (halaqat.find(h => h.id === log.halaqaId)?.name || 'تقرير حلقة') : 'تقرير حلقة');
                     return (
                       <div key={log.id} className="flex items-start gap-3 p-3 rounded-xl bg-cream dark:bg-gray-800/30 text-xs border border-gray-100 dark:border-gray-800">
                         <div className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${log.status === 'CONFIRMED' ? 'bg-primary' : 'bg-amber-400'}`} />
                         <div>
-                          <p className="font-bold text-gray-900 dark:text-white">{u?.name || 'دارس'}</p>
+                          <p className="font-bold text-gray-900 dark:text-white">{logTitle}</p>
                           <p className="text-gray-500 mt-0.5">سورة {log.surah} · {log.startAyah}-{log.endAyah}</p>
                           <p className={`mt-0.5 font-bold ${log.status === 'CONFIRMED' ? 'text-primary dark:text-emerald-400' : 'text-amber-500'}`}>
                             {log.status === 'CONFIRMED' ? 'معتمد' : 'بانتظار الاعتماد'}

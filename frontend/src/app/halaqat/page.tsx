@@ -11,6 +11,11 @@ interface Teacher {
   name: string;
 }
 
+interface Supervisor {
+  id: string;
+  name: string;
+}
+
 interface ProgressLog {
   id: string;
   studentId: string;
@@ -25,6 +30,7 @@ interface Halaqa {
   id: string;
   name: string;
   teacherId: string;
+  supervisorId?: string;
   startDate: string;
   startTime: string; // e.g. "04:00 م"
   endTime: string;   // e.g. "06:00 م"
@@ -51,6 +57,7 @@ export default function HalaqatPage() {
   // CRUD States
   const [halaqat, setHalaqat] = useState<Halaqa[]>([]);
   const [teachers, setTeachers] = useState<Teacher[]>([]);
+  const [supervisors, setSupervisors] = useState<Supervisor[]>([]);
   const [progressLogs, setProgressLogs] = useState<ProgressLog[]>([]);
   
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -61,6 +68,7 @@ export default function HalaqatPage() {
     id: '', // رقم الحلقة
     name: '', // اسم الحلقة
     teacherId: '', // المحفظ
+    supervisorId: '', // المشرف
     startDate: '', // تاريخ البداية
     startTimeHour: '04',
     startTimeMinute: '00',
@@ -126,6 +134,18 @@ export default function HalaqatPage() {
     }
     setTeachers(loadedTeachers);
 
+    // Load Supervisors from CRUD storage
+    const savedSupervisors = localStorage.getItem('tahfez_supervisors_crud');
+    let loadedSupervisors: Supervisor[] = [];
+    if (savedSupervisors) {
+      loadedSupervisors = JSON.parse(savedSupervisors);
+    } else {
+      loadedSupervisors = [
+        { id: 'sup-1', name: 'المهندس أحمد الشافعي' }
+      ];
+    }
+    setSupervisors(loadedSupervisors);
+
     // 2. Load Progress Logs to scan latest circle reports
     const savedLogs = localStorage.getItem('tahfez_progress_logs');
     let loadedLogs: ProgressLog[] = [];
@@ -160,6 +180,7 @@ export default function HalaqatPage() {
           id: '101', 
           name: 'حلقة التلاوة المصرية الأزهري', 
           teacherId: 't-1', 
+          supervisorId: 'sup-1',
           startDate: '2026-01-01', 
           startTime: demoStart, 
           endTime: demoEnd, 
@@ -174,6 +195,7 @@ export default function HalaqatPage() {
           id: '102', 
           name: 'حلقة الهمم العالية للقرآن', 
           teacherId: 't-2', 
+          supervisorId: 'sup-1',
           startDate: '2026-02-15', 
           startTime: '07:30 م', 
           endTime: '09:00 م', 
@@ -203,6 +225,7 @@ export default function HalaqatPage() {
       id: '',
       name: '',
       teacherId: teachers[0]?.id || '',
+      supervisorId: supervisors[0]?.id || '',
       startDate: new Date().toISOString().split('T')[0],
       startTimeHour: '04',
       startTimeMinute: '00',
@@ -242,6 +265,7 @@ export default function HalaqatPage() {
       id: halaqa.id,
       name: halaqa.name,
       teacherId: halaqa.teacherId,
+      supervisorId: halaqa.supervisorId || '',
       startDate: halaqa.startDate,
       startTimeHour: startParsed.hour,
       startTimeMinute: startParsed.minute,
@@ -277,7 +301,7 @@ export default function HalaqatPage() {
 
   const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.id || !formData.name || !formData.teacherId || !formData.startDate) {
+    if (!formData.id || !formData.name || !formData.teacherId || !formData.startDate || !formData.supervisorId) {
       alert('الرجاء ملء جميع الحقول المطلوبة.');
       return;
     }
@@ -293,6 +317,7 @@ export default function HalaqatPage() {
       id: formData.id,
       name: formData.name,
       teacherId: formData.teacherId,
+      supervisorId: formData.supervisorId,
       startDate: formData.startDate,
       startTime: formattedStartTime,
       endTime: formattedEndTime,
@@ -575,19 +600,35 @@ export default function HalaqatPage() {
                 </div>
               </div>
 
-              <div>
-                <label className="block text-xs font-bold text-gray-500 mb-1">المحفظ المسؤول *</label>
-                <select
-                  required
-                  value={formData.teacherId}
-                  onChange={(e) => setFormData({ ...formData, teacherId: e.target.value })}
-                  className="w-full px-3 py-2 bg-cream/20 dark:bg-gray-800/30 rounded-xl border border-gray-200 dark:border-gray-700 text-sm focus:outline-none focus:border-primary"
-                >
-                  <option value="">-- اختر الشيخ المحفظ --</option>
-                  {teachers.map(t => (
-                    <option key={t.id} value={t.id}>{t.name}</option>
-                  ))}
-                </select>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-gray-500 mb-1">المحفظ المسؤول *</label>
+                  <select
+                    required
+                    value={formData.teacherId}
+                    onChange={(e) => setFormData({ ...formData, teacherId: e.target.value })}
+                    className="w-full px-3 py-2 bg-cream/20 dark:bg-gray-800/30 rounded-xl border border-gray-200 dark:border-gray-700 text-sm focus:outline-none focus:border-primary"
+                  >
+                    <option value="">-- اختر الشيخ --</option>
+                    {teachers.map(t => (
+                      <option key={t.id} value={t.id}>{t.name}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-gray-500 mb-1">المشرف المسؤول *</label>
+                  <select
+                    required
+                    value={formData.supervisorId}
+                    onChange={(e) => setFormData({ ...formData, supervisorId: e.target.value })}
+                    className="w-full px-3 py-2 bg-cream/20 dark:bg-gray-800/30 rounded-xl border border-gray-200 dark:border-gray-700 text-sm focus:outline-none focus:border-primary"
+                  >
+                    <option value="">-- اختر المشرف --</option>
+                    {supervisors.map(s => (
+                      <option key={s.id} value={s.id}>{s.name}</option>
+                    ))}
+                  </select>
+                </div>
               </div>
 
               {/* Days of the week Checkboxes */}

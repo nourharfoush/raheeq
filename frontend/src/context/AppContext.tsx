@@ -44,6 +44,7 @@ export interface Halaqa {
   schedule: Array<{ day: string; time: string }>;
   teacherId: string;
   studentsCount: number;
+  supervisorId?: string;
 }
 
 export interface Session {
@@ -81,7 +82,7 @@ export interface MemorizationPlan {
 
 export interface ProgressLog {
   id: string;
-  studentId: string;
+  studentId?: string;
   planId?: string;
   surah: string;
   startAyah: number;
@@ -187,7 +188,7 @@ interface AppContextType {
   createSession: (halaqaId: string, title: string, description: string, start: string, end: string) => void;
   submitAttendance: (sessionId: string, records: Array<{ studentId: string; status: 'PRESENT' | 'ABSENT' | 'LATE'; notes?: string }>) => void;
   createPlan: (plan: Omit<MemorizationPlan, 'id' | 'status'>) => void;
-  addProgressLog: (log: Omit<ProgressLog, 'id' | 'date'>) => void;
+  addProgressLog: (log: Omit<ProgressLog, 'id' | 'date'> & { date?: string }) => void;
   confirmProgressLog: (id: string) => void;
   deleteProgressLog: (id: string) => void;
   updateProgressLog: (id: string, updatedLog: Partial<ProgressLog>) => void;
@@ -270,7 +271,30 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const defaultStudents: StudentProfile[] = [];
       const defaultTeachers: TeacherProfile[] = [];
       const defaultParents: StudentProfile[] = [];
-      const defaultHalaqat: Halaqa[] = [];
+      const defaultHalaqat: Halaqa[] = [
+        {
+          id: '101',
+          name: 'حلقة التلاوة المصرية الأزهري',
+          description: 'منهج ورش وحفص',
+          type: 'GROUP',
+          capacity: 15,
+          schedule: [{ day: 'السبت', time: '16:00' }, { day: 'الإثنين', time: '16:00' }],
+          teacherId: 't-profile',
+          studentsCount: 1,
+          supervisorId: 'sup-1'
+        },
+        {
+          id: '102',
+          name: 'حلقة الهمم العالية للقرآن',
+          description: 'حفظ مكثف للأطفال',
+          type: 'GROUP',
+          capacity: 10,
+          schedule: [{ day: 'السبت', time: '19:30' }, { day: 'الثلاثاء', time: '19:30' }],
+          teacherId: 't-2',
+          studentsCount: 0,
+          supervisorId: 'sup-1'
+        }
+      ];
       const defaultSessions: Session[] = [];
       const defaultPlans: MemorizationPlan[] = [];
       const defaultProgress: ProgressLog[] = [];
@@ -564,41 +588,43 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     saveState('t_plans', updated);
   };
 
-  const addProgressLog = (newLog: Omit<ProgressLog, 'id' | 'date'>) => {
+  const addProgressLog = (newLog: Omit<ProgressLog, 'id' | 'date'> & { date?: string }) => {
     const log: ProgressLog = {
       ...newLog,
       id: `log-${Math.random().toString(36).substring(5)}`,
-      date: new Date().toISOString()
+      date: newLog.date || new Date().toISOString()
     };
     const updated = [log, ...progressLogs];
     setProgressLogs(updated);
     saveState('t_progress', updated);
 
     // Send notification to student's parent
-    const student = studentProfiles.find(s => s.id === newLog.studentId);
-    if (student?.parentId) {
-      const parentProf = studentProfiles.find(p => p.id === student.parentId); // parent profile
-      const parentUser = users.find(u => u.id === parentProf?.userId || u.id === student.parentId); // or linked userId
-      const studentUser = users.find(u => u.id === student.userId);
+    if (newLog.studentId) {
+      const student = studentProfiles.find(s => s.id === newLog.studentId);
+      if (student?.parentId) {
+        const parentProf = studentProfiles.find(p => p.id === student.parentId); // parent profile
+        const parentUser = users.find(u => u.id === parentProf?.userId || u.id === student.parentId); // or linked userId
+        const studentUser = users.find(u => u.id === student.userId);
 
-      if (studentUser) {
-        const title = 'تحديث تقدم الحفظ لأبنائكم';
-        const content = `أنجز الطالب ${studentUser.name} بنجاح ورد ${newLog.isRevision ? 'مراجعة' : 'حفظ'} سورة ${newLog.surah} من الآية ${newLog.startAyah} إلى ${newLog.endAyah}.`;
-        
-        // Find parent's userId to send notification
-        const parentUserObj = users.find(u => u.role === 'PARENT' && (u.id === student.parentId || student.parentId === 'p-profile'));
-        if (parentUserObj) {
-          const notif: Notification = {
-            id: `not-${Math.random().toString(36).substring(5)}`,
-            userId: parentUserObj.id,
-            title,
-            content,
-            isRead: false,
-            createdAt: new Date().toISOString()
-          };
-          const updatedNotifs = [notif, ...notifications];
-          setNotifications(updatedNotifs);
-          saveState('t_notifications', updatedNotifs);
+        if (studentUser) {
+          const title = 'تحديث تقدم الحفظ لأبنائكم';
+          const content = `أنجز الطالب ${studentUser.name} بنجاح ورد ${newLog.isRevision ? 'مراجعة' : 'حفظ'} سورة ${newLog.surah} من الآية ${newLog.startAyah} إلى ${newLog.endAyah}.`;
+          
+          // Find parent's userId to send notification
+          const parentUserObj = users.find(u => u.role === 'PARENT' && (u.id === student.parentId || student.parentId === 'p-profile'));
+          if (parentUserObj) {
+            const notif: Notification = {
+              id: `not-${Math.random().toString(36).substring(5)}`,
+              userId: parentUserObj.id,
+              title,
+              content,
+              isRead: false,
+              createdAt: new Date().toISOString()
+            };
+            const updatedNotifs = [notif, ...notifications];
+            setNotifications(updatedNotifs);
+            saveState('t_notifications', updatedNotifs);
+          }
         }
       }
     }

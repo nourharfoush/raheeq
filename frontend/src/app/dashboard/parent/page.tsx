@@ -51,7 +51,7 @@ export default function ParentDashboard() {
   const myChildrenProfilesIds = myChildren.map(c => c.id);
 
   // Extract progress logs and evaluations of children
-  const kidsLogs = progressLogs.filter(l => myChildrenProfilesIds.includes(l.studentId));
+  const kidsLogs = progressLogs.filter(l => l.studentId && myChildrenProfilesIds.includes(l.studentId));
   const kidsEvaluations = evaluations.filter(e => myChildrenProfilesIds.includes(e.studentId));
 
   // Find child's user object
